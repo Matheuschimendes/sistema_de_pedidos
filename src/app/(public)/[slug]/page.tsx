@@ -70,7 +70,7 @@ function CardapioClient({ slug }: { slug: string }) {
     <main className="min-h-screen bg-zinc-100">
       <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-white">
         <MenuHeader
-          restaurantName="Cozinha da Serra"
+          restaurantName="Geladão dos Fernandes"
           slug={slug}
           search={search}
           onSearchChange={setSearch}
