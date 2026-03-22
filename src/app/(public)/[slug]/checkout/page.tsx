@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { checkoutItems, deliveryFeeDefault } from "@/src/data/checkout-mock";
+import { useEffect, useMemo, useState } from "react";
+import { menuProducts } from "@/src/data/menu-products";
+import { deliveryFeeDefault } from "@/src/data/checkout-mock";
 import { CheckoutHeader } from "@/src/components/public/checkout/checkout-header";
 import { OrderSummary } from "@/src/components/public/checkout/order-summary";
 import { DeliveryOptions } from "@/src/components/public/checkout/delivery-options";
@@ -13,7 +14,9 @@ import {
   CustomerData,
   DeliveryType,
   PaymentMethod,
+  CheckoutItem,
 } from "@/src/types/checkout";
+import { getCartFromStorage, getCartItemsFromProducts } from "@/src/lib/get-cart-items";
 
 type Props = {
   params: Promise<{
@@ -31,6 +34,8 @@ function CheckoutClient({ slug }: { slug: string }) {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successOrder, setSuccessOrder] = useState<string | null>(null);
+  const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>([]);
+  const [hydrated, setHydrated] = useState(false);
 
   const [customer, setCustomer] = useState<CustomerData>({
     name: "",
@@ -39,11 +44,18 @@ function CheckoutClient({ slug }: { slug: string }) {
     notes: "",
   });
 
+  useEffect(() => {
+    const cart = getCartFromStorage("mesa-cart");
+    const items = getCartItemsFromProducts(menuProducts, cart);
+    setCheckoutItems(items);
+    setHydrated(true);
+  }, []);
+
   const subtotal = useMemo(() => {
     return checkoutItems.reduce((acc, item) => {
       return acc + item.price * item.quantity;
     }, 0);
-  }, []);
+  }, [checkoutItems]);
 
   const discount = 0;
 
@@ -60,6 +72,11 @@ function CheckoutClient({ slug }: { slug: string }) {
   };
 
   const handleConfirm = () => {
+    if (checkoutItems.length === 0) {
+      alert("Seu carrinho está vazio.");
+      return;
+    }
+
     if (!customer.name.trim() || !customer.phone.trim()) {
       alert("Preencha nome e WhatsApp para continuar.");
       return;
@@ -74,10 +91,21 @@ function CheckoutClient({ slug }: { slug: string }) {
 
     setTimeout(() => {
       const orderNumber = `#${Math.floor(Math.random() * 9000 + 1000)}`;
+      window.localStorage.removeItem("mesa-cart");
       setSuccessOrder(orderNumber);
       setIsSubmitting(false);
     }, 1300);
   };
+
+  if (!hydrated) {
+    return (
+      <main className="mx-auto min-h-screen max-w-[480px] bg-zinc-50 p-4">
+        <div className="rounded-2xl bg-white p-4 text-sm text-zinc-500 shadow-sm">
+          Carregando checkout...
+        </div>
+      </main>
+    );
+  }
 
   if (successOrder) {
     return (
@@ -117,7 +145,7 @@ function CheckoutClient({ slug }: { slug: string }) {
         discount={discount}
         total={total}
         showDeliveryFee={deliveryType === "delivery"}
-        disabled={isSubmitting}
+        disabled={isSubmitting || checkoutItems.length === 0}
         onConfirm={handleConfirm}
       />
     </main>
