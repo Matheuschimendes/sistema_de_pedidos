@@ -4,7 +4,14 @@ export type Product = {
   description: string;
   price: number;
   category: string;
-  emoji: string;
+  emoji?: string;
+  image?: string;
 };
 
 export type Cart = Record<number, number>;
+
+export type MenuCategory = {
+  id: string;
+  name: string;
+  image: string;
+};

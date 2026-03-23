@@ -94,7 +94,7 @@ function CardapioClient({ slug }: { slug: string }) {
                   {category}
                 </div>
 
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-4">
                   {items.map((product) => (
                     <ProductCard
                       key={product.id}

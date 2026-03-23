@@ -16,7 +16,10 @@ import {
   PaymentMethod,
   CheckoutItem,
 } from "@/src/types/checkout";
-import { getCartFromStorage, getCartItemsFromProducts } from "@/src/lib/get-cart-items";
+import {
+  getCartFromStorage,
+  getCartItemsFromProducts,
+} from "@/src/lib/get-cart-items";
 
 type Props = {
   params: Promise<{
@@ -53,7 +56,7 @@ function CheckoutClient({ slug }: { slug: string }) {
 
     if (savedCustomer) {
       try {
-        setCustomer(JSON.parse(savedCustomer))
+        setCustomer(JSON.parse(savedCustomer));
       } catch {
         setCustomer({
           name: "",
@@ -69,7 +72,6 @@ function CheckoutClient({ slug }: { slug: string }) {
 
   useEffect(() => {
     if (!hydrated) return;
-
     window.localStorage.setItem("customer-data", JSON.stringify(customer));
   }, [customer, hydrated]);
 
@@ -111,9 +113,40 @@ function CheckoutClient({ slug }: { slug: string }) {
 
     setIsSubmitting(true);
 
+    const orderNumber = `#${Math.floor(Math.random() * 9000 + 1000)}`;
+
+    const itemsText = checkoutItems
+      .map((item) => `${item.quantity}x ${item.name}`)
+      .join("\n");
+
+    const message = `
+*Novo pedido ${orderNumber}*
+
+*Itens:*
+${itemsText}
+
+*Entrega:* ${deliveryType === "delivery" ? "Delivery" : "Retirada"}
+*Pagamento:* ${paymentMethod}
+*Total:* R$ ${total.toFixed(2).replace(".", ",")}
+
+*Cliente:* ${customer.name}
+*Telefone:* ${customer.phone}
+*Endereço:* ${customer.address || "Retirada no balcão"}
+*Observações:* ${customer.notes || "Nenhuma"}
+`;
+
     setTimeout(() => {
-      const orderNumber = `#${Math.floor(Math.random() * 9000 + 1000)}`;
+      const whatsappNumber = "5585991223506";
+
+      const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+        message
+      )}`;
+
       window.localStorage.removeItem("mesa-cart");
+      window.localStorage.removeItem("customer-data");
+
+      window.open(url, "_blank");
+
       setSuccessOrder(orderNumber);
       setIsSubmitting(false);
     }, 1300);
