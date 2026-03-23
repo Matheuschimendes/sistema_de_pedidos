@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, use, useEffect, useMemo, useState } from "react";
 import { menuProducts } from "@/src/data/menu-products";
 import { deliveryFeeDefault } from "@/src/data/checkout-mock";
 import { CheckoutHeader } from "@/src/components/public/checkout/checkout-header";
@@ -10,6 +10,7 @@ import { CustomerForm } from "@/src/components/public/checkout/customer-form";
 import { PaymentOptions } from "@/src/components/public/checkout/payment-options";
 import { CheckoutFooter } from "@/src/components/public/checkout/checkout-footer";
 import { OrderSuccess } from "@/src/components/public/checkout/order-success";
+import { getRestaurantBySlug } from "@/src/data/restaurants";
 import {
   CustomerData,
   DeliveryType,
@@ -27,8 +28,8 @@ type Props = {
   }>;
 };
 
-export default async function CheckoutPage({ params }: Props) {
-  const { slug } = await params;
+export default function CheckoutPage({ params }: Props) {
+  const { slug } = use(params);
   return <CheckoutClient slug={slug} />;
 }
 
@@ -39,6 +40,7 @@ function CheckoutClient({ slug }: { slug: string }) {
   const [successOrder, setSuccessOrder] = useState<string | null>(null);
   const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const restaurant = getRestaurantBySlug(slug);
 
   const [customer, setCustomer] = useState<CustomerData>({
     name: "",
@@ -50,24 +52,33 @@ function CheckoutClient({ slug }: { slug: string }) {
   useEffect(() => {
     const cart = getCartFromStorage("mesa-cart");
     const items = getCartItemsFromProducts(menuProducts, cart);
-    setCheckoutItems(items);
+    let nextCustomer: CustomerData = {
+      name: "",
+      phone: "",
+      address: "",
+      notes: "",
+    };
 
     const savedCustomer = window.localStorage.getItem("customer-data");
 
     if (savedCustomer) {
       try {
-        setCustomer(JSON.parse(savedCustomer));
+        nextCustomer = JSON.parse(savedCustomer);
       } catch {
-        setCustomer({
+        nextCustomer = {
           name: "",
           phone: "",
           address: "",
           notes: "",
-        });
+        };
       }
     }
 
-    setHydrated(true);
+    startTransition(() => {
+      setCheckoutItems(items);
+      setCustomer(nextCustomer);
+      setHydrated(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -178,7 +189,11 @@ ${itemsText}
 
   return (
     <main className="mx-auto min-h-screen max-w-[480px] bg-zinc-50">
-      <CheckoutHeader slug={slug} />
+      <CheckoutHeader
+        slug={slug}
+        restaurantName={restaurant.name}
+        restaurantLogo={restaurant.logo}
+      />
 
       <div className="flex flex-col gap-3 px-4 pb-32 pt-3">
         <OrderSummary items={checkoutItems} subtotal={subtotal} />

@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import { MenuHeader } from "@/src/components/public/menu/menu-header";
 import { CategoryChips } from "@/src/components/public/menu/category-chips";
 import { ProductCard } from "@/src/components/public/menu/product-card";
 import { CartBar } from "@/src/components/public/menu/cart-bar";
 import { CartDrawer } from "@/src/components/public/menu/cart-drawer";
 import { menuProducts, menuCategories } from "@/src/data/menu-products";
+import { getRestaurantBySlug } from "@/src/data/restaurants";
+import { getRestaurantBusinessStatus } from "@/src/lib/get-restaurant-business-status";
 import { useCart } from "@/src/hooks/use-cart";
 
 type Props = {
@@ -15,8 +17,8 @@ type Props = {
   }>;
 };
 
-export default async function PublicMenuPage({ params }: Props) {
-  const { slug } = await params;
+export default function PublicMenuPage({ params }: Props) {
+  const { slug } = use(params);
   return <CardapioClient slug={slug} />;
 }
 
@@ -24,6 +26,20 @@ function CardapioClient({ slug }: { slug: string }) {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+
+  const restaurant = useMemo(() => getRestaurantBySlug(slug), [slug]);
+  const restaurantBusinessStatus = useMemo(() => {
+    return getRestaurantBusinessStatus(restaurant, currentTime);
+  }, [restaurant, currentTime]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60_000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const {
     cart,
@@ -70,7 +86,11 @@ function CardapioClient({ slug }: { slug: string }) {
     <main className="min-h-screen bg-zinc-100">
       <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-white">
         <MenuHeader
-          restaurantName="Geladão dos Fernandes"
+          restaurantName={restaurant.name}
+          restaurantLogo={restaurant.logo}
+          restaurantStatusLabel={restaurantBusinessStatus.label}
+          restaurantStatusDetail={restaurantBusinessStatus.detail}
+          restaurantStatusTone={restaurantBusinessStatus.tone}
           slug={slug}
           search={search}
           onSearchChange={setSearch}

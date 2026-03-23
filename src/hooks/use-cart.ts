@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import { Product, Cart } from "@/src/types/menu";
 
 type UseCartParams = {
@@ -19,16 +19,20 @@ export function useCart({
 
   useEffect(() => {
     const savedCart = window.localStorage.getItem(storageKey);
+    let nextCart: Cart = {};
 
     if (savedCart) {
       try {
-        setCart(JSON.parse(savedCart));
+        nextCart = JSON.parse(savedCart);
       } catch {
-        setCart({});
+        nextCart = {};
       }
     }
 
-    setHydrated(true);
+    startTransition(() => {
+      setCart(nextCart);
+      setHydrated(true);
+    });
   }, [storageKey]);
 
   useEffect(() => {
