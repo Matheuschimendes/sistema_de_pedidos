@@ -48,8 +48,30 @@ function CheckoutClient({ slug }: { slug: string }) {
     const cart = getCartFromStorage("mesa-cart");
     const items = getCartItemsFromProducts(menuProducts, cart);
     setCheckoutItems(items);
+
+    const savedCustomer = window.localStorage.getItem("customer-data");
+
+    if (savedCustomer) {
+      try {
+        setCustomer(JSON.parse(savedCustomer))
+      } catch {
+        setCustomer({
+          name: "",
+          phone: "",
+          address: "",
+          notes: "",
+        });
+      }
+    }
+
     setHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+
+    window.localStorage.setItem("customer-data", JSON.stringify(customer));
+  }, [customer, hydrated]);
 
   const subtotal = useMemo(() => {
     return checkoutItems.reduce((acc, item) => {
