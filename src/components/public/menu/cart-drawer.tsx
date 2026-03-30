@@ -81,7 +81,7 @@ export function CartDrawer({
 
                 <button
                   onClick={() => onIncrease(item.id)}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500 text-sm text-white"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--brand-primary)] text-sm text-white"
                 >
                   +
                 </button>
@@ -107,12 +107,12 @@ export function CartDrawer({
 
           <div className="mb-4 flex justify-between text-lg font-semibold text-zinc-900">
             <span>Total</span>
-            <span className="text-emerald-600">{formatBRL(total)}</span>
+            <span className="text-[var(--brand-accent)]">{formatBRL(total)}</span>
           </div>
 
           <Link
             href={`/${slug}/checkout`}
-            className="block w-full rounded-xl bg-emerald-500 px-4 py-3 text-center text-sm font-semibold text-white hover:opacity-90"
+            className="block w-full rounded-xl bg-[var(--brand-primary)] px-4 py-3 text-center text-sm font-semibold text-white hover:opacity-90"
           >
             Continuar para checkout →
           </Link>

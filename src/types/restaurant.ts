@@ -25,6 +25,7 @@ export type RestaurantBusinessStatus = {
 };
 
 export type RestaurantProfile = {
+  bannerImage?: string;
   slug: string;
   name: string;
   logo?: string;

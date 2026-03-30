@@ -26,9 +26,9 @@ export function MenuHeader({
   const restaurantInitials = getNameInitials(restaurantName);
   const statusClassName =
     restaurantStatusTone === "open"
-      ? "border-emerald-200 bg-emerald-100 text-emerald-800"
+      ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-ink)]"
       : restaurantStatusTone === "closed"
-        ? "border-rose-200 bg-rose-50 text-rose-700"
+        ? "border-[var(--brand-accent)] bg-[var(--brand-accent-soft)] text-[var(--brand-accent-ink)]"
         : "border-zinc-200 bg-zinc-100 text-zinc-700";
 
   return (
@@ -55,7 +55,7 @@ export function MenuHeader({
             <div className="text-sm font-semibold text-zinc-900">
               {restaurantName}
             </div>
-            <div className="text-[10px] text-amber-600">
+            <div className="text-[10px] text-[var(--brand-accent)]">
               ★ 4.8 · 312 avaliações
             </div>
           </div>
@@ -76,7 +76,7 @@ export function MenuHeader({
         <span>📱 Pedido pelo app</span>
       </div>
 
-      <div className="mb-3 flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
+      <div className="mb-3 flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus-within:border-[var(--brand-primary)] focus-within:ring-2 focus-within:ring-[var(--brand-primary-soft)]">
         <span className="text-sm text-zinc-400">🔍</span>
         <input
           value={search}

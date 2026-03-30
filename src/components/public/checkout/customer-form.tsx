@@ -26,7 +26,7 @@ export function CustomerForm({
             value={data.name}
             onChange={(e) => onChange("name", e.target.value)}
             placeholder="Seu nome"
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary-soft)]"
           />
         </div>
 
@@ -38,7 +38,7 @@ export function CustomerForm({
             value={data.phone}
             onChange={(e) => onChange("phone", e.target.value)}
             placeholder="(85) 99999-9999"
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary-soft)]"
           />
         </div>
 
@@ -51,7 +51,7 @@ export function CustomerForm({
               value={data.address}
               onChange={(e) => onChange("address", e.target.value)}
               placeholder="Rua, número, complemento, bairro..."
-              className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+              className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary-soft)]"
             />
           </div>
         )}
@@ -64,7 +64,7 @@ export function CustomerForm({
             value={data.notes}
             onChange={(e) => onChange("notes", e.target.value)}
             placeholder="Ex: sem cebola..."
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary-soft)]"
           />
         </div>
       </div>

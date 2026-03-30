@@ -19,7 +19,7 @@ export function DeliveryOptions({
         <button
           onClick={() => onChange("delivery")}
           className={`rounded-xl border p-4 text-center ${value === "delivery"
-            ? "border-emerald-500 bg-emerald-50"
+            ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)]"
             : "border-zinc-200 bg-white"
             }`}
         >
@@ -31,7 +31,7 @@ export function DeliveryOptions({
         <button
           onClick={() => onChange("pickup")}
           className={`rounded-xl border p-4 text-center ${value === "pickup"
-            ? "border-emerald-500 bg-emerald-50"
+            ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)]"
             : "border-zinc-200 bg-white"
             }`}
         >

@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+:root {
+  --brand-ink: #080828;
+  --brand-primary: #5888b8;
+  --brand-primary-soft: #c8e8f8;
+  --brand-accent: #d88818;
+  --brand-accent-soft: #fff3d6;
+  --brand-accent-ink: #883818;
+}
+
 * {
   box-sizing: border-box;
 }

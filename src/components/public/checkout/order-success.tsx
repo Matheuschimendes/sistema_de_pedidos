@@ -19,7 +19,7 @@ export function OrderSuccess({
 }: OrderSuccessProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-      <div className="mb-5 flex h-[72px] w-[72px] items-center justify-center rounded-full bg-emerald-100 text-3xl">
+      <div className="mb-5 flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[var(--brand-primary-soft)] text-3xl text-[var(--brand-primary)]">
         ✓
       </div>
 
@@ -49,7 +49,7 @@ export function OrderSuccess({
 
         <div className="mt-3 flex justify-between border-t border-zinc-100 pt-3 text-sm font-semibold">
           <span>Total pago</span>
-          <span className="text-emerald-600">{formatBRL(total)}</span>
+          <span className="text-[var(--brand-accent)]">{formatBRL(total)}</span>
         </div>
       </div>
 
@@ -59,7 +59,7 @@ export function OrderSuccess({
 
       <Link
         href={`/${slug}`}
-        className="rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-white"
+        className="rounded-xl bg-[var(--brand-primary)] px-6 py-3 text-sm font-semibold text-white"
       >
         Voltar ao cardápio
       </Link>

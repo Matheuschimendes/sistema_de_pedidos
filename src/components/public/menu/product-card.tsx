@@ -50,7 +50,7 @@ export function ProductCard({
           {quantity === 0 ? (
             <button
               onClick={onAdd}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-lg text-white"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-primary)] text-lg text-white"
             >
               +
             </button>
@@ -69,7 +69,7 @@ export function ProductCard({
 
               <button
                 onClick={onAdd}
-                className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500 text-sm text-white"
+                className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--brand-primary)] text-sm text-white"
               >
                 +
               </button>

@@ -138,6 +138,7 @@ ${itemsText}
 
 *Entrega:* ${deliveryType === "delivery" ? "Delivery" : "Retirada"}
 *Pagamento:* ${paymentMethod}
+*Taxa de entrega:* ${deliveryFee > 0 ? `R$ ${deliveryFee.toFixed(2).replace(".", ",")}` : "Grátis"}
 *Total:* R$ ${total.toFixed(2).replace(".", ",")}
 
 *Cliente:* ${customer.name}

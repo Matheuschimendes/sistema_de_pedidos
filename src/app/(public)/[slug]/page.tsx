@@ -10,6 +10,8 @@ import { menuProducts, menuCategories } from "@/src/data/menu-products";
 import { getRestaurantBySlug } from "@/src/data/restaurants";
 import { getRestaurantBusinessStatus } from "@/src/lib/get-restaurant-business-status";
 import { useCart } from "@/src/hooks/use-cart";
+import { MenuHeroBanner } from "@/src/components/public/menu/menu-hero-banner";
+import { MenuInfoCarousel } from "@/src/components/public/menu/menu-info-carousel";
 
 type Props = {
   params: Promise<{
@@ -84,6 +86,14 @@ function CardapioClient({ slug }: { slug: string }) {
 
   return (
     <main className="min-h-screen bg-zinc-100">
+      <MenuHeroBanner
+        restaurantName={restaurant.name}
+        restaurantLogo={restaurant.logo}
+        bannerImage={restaurant.bannerImage}
+        restaurantStatusLabel={restaurantBusinessStatus.label}
+        restaurantStatusDetail={restaurantBusinessStatus.detail}
+        restaurantStatusTone={restaurantBusinessStatus.tone}
+      />
       <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-white">
         <MenuHeader
           restaurantName={restaurant.name}
@@ -94,6 +104,11 @@ function CardapioClient({ slug }: { slug: string }) {
           slug={slug}
           search={search}
           onSearchChange={setSearch}
+        />
+
+        <MenuInfoCarousel
+          deliveryFee={deliveryFee}
+          restaurantName={restaurant.name}
         />
 
         <CategoryChips

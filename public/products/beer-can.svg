@@ -1,0 +1,61 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cerveja gelada (lata)">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="800" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="0.55" stop-color="#111827"/>
+      <stop offset="1" stop-color="#064E3B"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(860 220) rotate(122) scale(520 520)">
+      <stop stop-color="#34D399" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#34D399" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="510" y1="160" x2="720" y2="660" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E5E7EB"/>
+      <stop offset="0.2" stop-color="#F3F4F6"/>
+      <stop offset="0.45" stop-color="#A1A1AA"/>
+      <stop offset="0.7" stop-color="#F4F4F5"/>
+      <stop offset="1" stop-color="#D4D4D8"/>
+    </linearGradient>
+    <linearGradient id="label" x1="520" y1="330" x2="710" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F59E0B"/>
+      <stop offset="1" stop-color="#B45309"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="540" y1="220" x2="590" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0.85"/>
+      <stop offset="0.35" stop-color="white" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="410" y="170" width="380" height="560" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="22" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" rx="56" fill="url(#bg)"/>
+  <rect width="1200" height="800" rx="56" fill="url(#glow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="470" y="170" width="260" height="520" rx="44" fill="url(#metal)"/>
+    <rect x="485" y="196" width="230" height="38" rx="18" fill="#E5E7EB" opacity="0.85"/>
+    <rect x="485" y="626" width="230" height="44" rx="22" fill="#D4D4D8" opacity="0.9"/>
+
+    <rect x="495" y="320" width="210" height="250" rx="28" fill="url(#label)"/>
+    <path d="M530 405C560 352 640 352 670 405C688 436 678 474 650 498C621 524 579 524 550 498C522 474 512 436 530 405Z" fill="#FEF3C7" opacity="0.95"/>
+    <path d="M562 428C575 406 605 406 618 428C626 442 622 462 610 472C598 482 582 482 570 472C558 462 554 442 562 428Z" fill="#F59E0B" opacity="0.9"/>
+    <rect x="520" y="585" width="160" height="36" rx="18" fill="#111827" opacity="0.28"/>
+    <rect x="530" y="594" width="140" height="18" rx="9" fill="#F8FAFC" opacity="0.85"/>
+
+    <rect x="510" y="200" width="60" height="480" rx="30" fill="url(#shine)" opacity="0.55"/>
+  </g>
+
+  <ellipse cx="600" cy="712" rx="190" ry="30" fill="#000000" opacity="0.25"/>
+
+  <g opacity="0.22">
+    <circle cx="175" cy="170" r="3" fill="#E2E8F0"/>
+    <circle cx="220" cy="210" r="2" fill="#E2E8F0"/>
+    <circle cx="310" cy="150" r="2" fill="#E2E8F0"/>
+    <circle cx="1010" cy="610" r="3" fill="#D1FAE5"/>
+    <circle cx="960" cy="650" r="2" fill="#D1FAE5"/>
+    <circle cx="1040" cy="690" r="2" fill="#D1FAE5"/>
+  </g>
+</svg>
+

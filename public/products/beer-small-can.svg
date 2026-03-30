@@ -1,0 +1,49 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cerveja gelada (lata pequena)">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1200" y2="800" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="0.55" stop-color="#111827"/>
+      <stop offset="1" stop-color="#1E293B"/>
+    </linearGradient>
+    <radialGradient id="coolGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(820 260) rotate(120) scale(520 520)">
+      <stop stop-color="#60A5FA" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#60A5FA" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="metal2" x1="520" y1="220" x2="700" y2="670" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E5E7EB"/>
+      <stop offset="0.3" stop-color="#F3F4F6"/>
+      <stop offset="0.55" stop-color="#A1A1AA"/>
+      <stop offset="0.8" stop-color="#F4F4F5"/>
+      <stop offset="1" stop-color="#D4D4D8"/>
+    </linearGradient>
+    <linearGradient id="label2" x1="520" y1="360" x2="700" y2="610" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="shine3" x1="545" y1="260" x2="590" y2="690" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0.85"/>
+      <stop offset="0.35" stop-color="white" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow3" x="430" y="210" width="360" height="520" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="20" stdDeviation="16" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" rx="56" fill="url(#bg3)"/>
+  <rect width="1200" height="800" rx="56" fill="url(#coolGlow)"/>
+
+  <g filter="url(#shadow3)">
+    <rect x="500" y="220" width="200" height="470" rx="42" fill="url(#metal2)"/>
+    <rect x="512" y="242" width="176" height="34" rx="17" fill="#E5E7EB" opacity="0.85"/>
+    <rect x="512" y="632" width="176" height="40" rx="20" fill="#D4D4D8" opacity="0.9"/>
+    <rect x="520" y="350" width="160" height="220" rx="26" fill="url(#label2)"/>
+    <path d="M548 430C566 398 634 398 652 430C664 452 657 478 636 494C615 510 585 510 564 494C543 478 536 452 548 430Z" fill="#E0F2FE" opacity="0.92"/>
+    <rect x="540" y="588" width="120" height="30" rx="15" fill="#111827" opacity="0.24"/>
+    <rect x="548" y="596" width="104" height="14" rx="7" fill="#F8FAFC" opacity="0.86"/>
+    <rect x="530" y="250" width="52" height="440" rx="26" fill="url(#shine3)" opacity="0.55"/>
+  </g>
+
+  <ellipse cx="600" cy="722" rx="170" ry="28" fill="#000000" opacity="0.25"/>
+</svg>
+

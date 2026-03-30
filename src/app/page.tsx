@@ -5,7 +5,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-zinc-50">
       <section className="mx-auto flex min-h-screen max-w-5xl items-center px-6 py-12">
         <div className="w-full rounded-3xl bg-white p-8 shadow-sm md:p-12">
-          <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
+          <span className="inline-flex rounded-full bg-[var(--brand-primary-soft)] px-3 py-1 text-sm font-medium text-[var(--brand-primary)]">
             Cardápio digital
           </span>
 
@@ -20,7 +20,7 @@ export default function HomePage() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/cardapio"
-              className="rounded-2xl bg-emerald-500 px-6 py-3 text-center font-medium text-white hover:bg-emerald-600"
+              className="rounded-2xl bg-[var(--brand-primary)] px-6 py-3 text-center font-medium text-white hover:opacity-90"
             >
               Ver cardápio
             </Link>

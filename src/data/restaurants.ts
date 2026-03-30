@@ -3,13 +3,13 @@ import { RestaurantOpeningHours, RestaurantProfile } from "@/src/types/restauran
 const defaultRestaurantLogo = "/brand/default-restaurant-logo.svg";
 const defaultTimeZone = "America/Fortaleza";
 const defaultOpeningHours: RestaurantOpeningHours = {
-  monday: { open: "08:00", close: "18:00" },
-  tuesday: { open: "08:00", close: "22:00" },
-  wednesday: { open: "08:00", close: "22:00" },
-  thursday: { open: "08:00", close: "22:00" },
-  friday: { open: "08:00", close: "23:00" },
-  saturday: { open: "08:00", close: "23:00" },
-  sunday: { open: "09:00", close: "18:00" },
+  monday: { open: "10:00", close: "22:00" },
+  tuesday: { open: "10:00", close: "22:00" },
+  wednesday: { open: "10:00", close: "22:00" },
+  thursday: { open: "10:00", close: "22:00" },
+  friday: { open: "10:00", close: "23:00" },
+  saturday: { open: "10:00", close: "23:00" },
+  sunday: { open: "10:00", close: "18:00" },
 };
 
 const restaurants: Record<string, RestaurantProfile> = {

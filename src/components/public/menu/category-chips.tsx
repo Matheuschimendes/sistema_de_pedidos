@@ -19,7 +19,7 @@ export function CategoryChips({
             key={category}
             onClick={() => onSelectCategory(category)}
             className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition ${active
-              ? "border-zinc-900 bg-zinc-900 text-white"
+              ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white"
               : "border-zinc-200 bg-zinc-100 text-zinc-500"
               }`}
           >

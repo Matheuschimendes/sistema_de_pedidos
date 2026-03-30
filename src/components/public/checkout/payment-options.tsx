@@ -28,7 +28,7 @@ export function PaymentOptions({
             key={option.key}
             onClick={() => onChange(option.key)}
             className={`flex items-center gap-2 rounded-xl border p-3 ${value === option.key
-                ? "border-emerald-500 bg-emerald-50"
+                ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)]"
                 : "border-zinc-200 bg-white"
               }`}
           >

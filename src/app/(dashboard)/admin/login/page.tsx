@@ -28,7 +28,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full rounded-2xl bg-emerald-500 px-4 py-3 font-medium text-white"
+            className="w-full rounded-2xl bg-[var(--brand-primary)] px-4 py-3 font-medium text-white hover:opacity-90"
           >
             Entrar
           </button>

@@ -9,6 +9,7 @@ export const menuProducts: Product[] = [
     price: 3.5,
     category: "Cervejas",
     emoji: "🍺",
+    image: "/products/beer-can.svg",
   },
   {
     id: 2,
@@ -17,6 +18,7 @@ export const menuProducts: Product[] = [
     price: 4.0,
     category: "Cervejas",
     emoji: "🍺",
+    image: "/products/beer-can.svg",
   },
   {
     id: 3,
@@ -25,6 +27,7 @@ export const menuProducts: Product[] = [
     price: 4.0,
     category: "Cervejas",
     emoji: "🍺",
+    image: "/products/beer-can.svg",
   },
   {
     id: 4,
@@ -33,6 +36,7 @@ export const menuProducts: Product[] = [
     price: 4.0,
     category: "Cervejas",
     emoji: "🍺",
+    image: "/products/beer-can.svg",
   },
   {
     id: 5,
@@ -41,6 +45,7 @@ export const menuProducts: Product[] = [
     price: 4.5,
     category: "Cervejas",
     emoji: "🍺",
+    image: "/products/beer-can.svg",
   },
   {
     id: 6,
@@ -49,6 +54,7 @@ export const menuProducts: Product[] = [
     price: 5.0,
     category: "Cervejas",
     emoji: "🍺",
+    image: "/products/beer-can.svg",
   },
   {
     id: 7,
@@ -57,6 +63,7 @@ export const menuProducts: Product[] = [
     price: 5.0,
     category: "Cervejas",
     emoji: "🍺",
+    image: "/products/beer-can.svg",
   },
   {
     id: 8,
@@ -65,6 +72,7 @@ export const menuProducts: Product[] = [
     price: 6.0,
     category: "Cervejas",
     emoji: "🍺",
+    image: "/products/beer-can.svg",
   },
   {
     id: 9,
@@ -73,6 +81,7 @@ export const menuProducts: Product[] = [
     price: 6.0,
     category: "Cervejas",
     emoji: "🍺",
+    image: "/products/beer-can.svg",
   },
   {
     id: 10,
@@ -81,6 +90,7 @@ export const menuProducts: Product[] = [
     price: 6.5,
     category: "Cervejas",
     emoji: "🍺",
+    image: "/products/beer-can.svg",
   },
 
   // 🍾 LONG NECK
@@ -91,6 +101,7 @@ export const menuProducts: Product[] = [
     price: 6.5,
     category: "Long Neck",
     emoji: "🍾",
+    image: "/products/beer-long-neck.svg",
   },
   {
     id: 12,
@@ -99,6 +110,7 @@ export const menuProducts: Product[] = [
     price: 7.0,
     category: "Long Neck",
     emoji: "🍾",
+    image: "/products/beer-long-neck.svg",
   },
   {
     id: 13,
@@ -107,6 +119,7 @@ export const menuProducts: Product[] = [
     price: 8.0,
     category: "Long Neck",
     emoji: "🍾",
+    image: "/products/beer-long-neck.svg",
   },
 
   // 🍺 BUCHUDINHA
@@ -117,6 +130,7 @@ export const menuProducts: Product[] = [
     price: 3.5,
     category: "Buchudinha",
     emoji: "🍺",
+    image: "/products/beer-small-can.svg",
   },
 
   // ⚡ ENERGÉTICOS

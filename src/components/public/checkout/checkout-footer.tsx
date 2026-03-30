@@ -44,13 +44,13 @@ export function CheckoutFooter({
 
       <div className="mb-4 flex justify-between text-lg font-semibold text-zinc-900">
         <span>Total</span>
-        <span className="text-emerald-600">{formatBRL(total)}</span>
+        <span className="text-[var(--brand-accent)]">{formatBRL(total)}</span>
       </div>
 
       <button
         onClick={onConfirm}
         disabled={disabled}
-        className="w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-zinc-300"
+        className="w-full rounded-xl bg-[var(--brand-primary)] px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-zinc-300"
       >
         ✓ Confirmar pedido
       </button>
