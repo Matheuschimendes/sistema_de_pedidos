@@ -15,6 +15,18 @@ export function MenuInfoCarousel({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const slideRefs = useRef<Array<HTMLDivElement | null>>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const slides = [
+    {
+      id: "delivery",
+      buttonLabel: "entrega e pagamento",
+      content: <MenuQuickInfoCard deliveryFee={deliveryFee} />,
+    },
+    {
+      id: "tip",
+      buttonLabel: "dica de pedido",
+      content: <MenuTipCard restaurantName={restaurantName} />,
+    },
+  ];
 
   useEffect(() => {
     const container = containerRef.current;
@@ -81,48 +93,34 @@ export function MenuInfoCarousel({
         ref={containerRef}
         className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 scroll-smooth"
       >
-        <div
-          ref={(element) => {
-            slideRefs.current[0] = element;
-          }}
-          className="w-full shrink-0 snap-start"
-          role="group"
-          aria-roledescription="slide"
-          aria-label="1 de 2"
-        >
-          <MenuQuickInfoCard deliveryFee={deliveryFee} />
-        </div>
-
-        <div
-          ref={(element) => {
-            slideRefs.current[1] = element;
-          }}
-          className="w-full shrink-0 snap-start"
-          role="group"
-          aria-roledescription="slide"
-          aria-label="2 de 2"
-        >
-          <MenuTipCard restaurantName={restaurantName} />
-        </div>
+        {slides.map((slide, index) => (
+          <div
+            key={slide.id}
+            ref={(element) => {
+              slideRefs.current[index] = element;
+            }}
+            className="w-full shrink-0 snap-start"
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${index + 1} de ${slides.length}`}
+          >
+            {slide.content}
+          </div>
+        ))}
       </div>
 
       <div className="flex items-center justify-center gap-2 pb-1">
-        <button
-          type="button"
-          aria-label="Ver entrega e pagamento"
-          aria-current={activeIndex === 0 ? "true" : undefined}
-          onClick={() => scrollToIndex(0)}
-          className={`h-1.5 w-1.5 rounded-full transition-colors ${activeIndex === 0 ? "bg-[var(--brand-primary)]" : "bg-zinc-300"
-            }`}
-        />
-        <button
-          type="button"
-          aria-label="Ver dica de pedido"
-          aria-current={activeIndex === 1 ? "true" : undefined}
-          onClick={() => scrollToIndex(1)}
-          className={`h-1.5 w-1.5 rounded-full transition-colors ${activeIndex === 1 ? "bg-[var(--brand-primary)]" : "bg-zinc-300"
-            }`}
-        />
+        {slides.map((slide, index) => (
+          <button
+            key={slide.id}
+            type="button"
+            aria-label={`Ver ${slide.buttonLabel}`}
+            aria-current={activeIndex === index ? "true" : undefined}
+            onClick={() => scrollToIndex(index)}
+            className={`h-1.5 w-1.5 rounded-full transition-colors ${activeIndex === index ? "bg-[var(--brand-primary)]" : "bg-zinc-300"
+              }`}
+          />
+        ))}
       </div>
     </section>
   );
@@ -130,17 +128,17 @@ export function MenuInfoCarousel({
 
 function MenuQuickInfoCard({ deliveryFee }: { deliveryFee: number }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-r from-[var(--brand-ink)] via-[var(--brand-ink)] to-[var(--brand-primary)] p-4 text-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-r from-[var(--brand-ink)] via-[var(--brand-ink)] to-[var(--brand-primary)] p-5 text-white shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm font-semibold">Entrega e pagamento</div>
-          <div className="mt-1 text-xs leading-5 text-zinc-200">
-            Taxa {formatBRL(deliveryFee)} · Pix, cartão ou dinheiro · Checkout
-            rápido
+          <div className="text-base font-semibold">Entrega e pagamento</div>
+          <div className="mt-1 text-sm leading-6 text-zinc-200">
+            Taxa {formatBRL(deliveryFee)} com pagamento via Pix, cartão ou
+            dinheiro. Checkout rápido direto pelo celular.
           </div>
         </div>
 
-        <div className="shrink-0 rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold text-white">
+        <div className="shrink-0 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white">
           Info
         </div>
       </div>
@@ -150,19 +148,19 @@ function MenuQuickInfoCard({ deliveryFee }: { deliveryFee: number }) {
 
 function MenuTipCard({ restaurantName }: { restaurantName: string }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-br from-[var(--brand-primary-soft)] via-white to-[var(--brand-accent-soft)] p-4 shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-br from-[var(--brand-primary-soft)] via-white to-[var(--brand-accent-soft)] p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm font-semibold text-zinc-900">
+          <div className="text-base font-semibold text-zinc-900">
             Faça seu pedido de forma rápida e prática
           </div>
-          <div className="mt-1 text-xs leading-5 text-zinc-600">
-            Use a busca para encontrar seus itens e finalize tudo pelo celular em{" "}
-            {restaurantName}.
+          <div className="mt-1 text-sm leading-6 text-zinc-600">
+            Use a busca, navegue pelas categorias e escolha seus combos ou
+            bebidas para finalizar tudo pelo celular em {restaurantName}.
           </div>
         </div>
 
-        <div className="shrink-0 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[10px] font-semibold text-[var(--brand-ink)]">
+        <div className="shrink-0 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-xs font-semibold text-[var(--brand-ink)]">
           Dica
         </div>
       </div>

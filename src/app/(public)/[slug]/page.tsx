@@ -117,15 +117,15 @@ function CardapioClient({ slug }: { slug: string }) {
           onSelectCategory={setSelectedCategory}
         />
 
-        <section className="flex-1 space-y-5 px-4 pb-24 pt-3">
+        <section className="flex-1 space-y-6 px-4 pb-24 pt-4">
           {Object.keys(groupedProducts).length === 0 ? (
-            <div className="rounded-2xl border border-zinc-100 bg-white p-6 text-center text-sm text-zinc-500 shadow-sm">
+            <div className="rounded-2xl border border-zinc-100 bg-white p-7 text-center text-base text-zinc-500 shadow-sm">
               Nenhum item encontrado.
             </div>
           ) : (
             Object.entries(groupedProducts).map(([category, items]) => (
               <div key={category}>
-                <div className="mb-3 border-b border-zinc-100 pb-2 text-sm font-semibold text-zinc-900">
+                <div className="mb-3 border-b border-zinc-100 pb-2 text-base font-semibold text-zinc-900">
                   {category}
                 </div>
 

@@ -1,6 +1,30 @@
 import { Product } from "@/src/types/menu";
 
 export const menuProducts: Product[] = [
+  // 🥃 COMBOS
+  {
+    id: 17,
+    name: "Combo Black & White + Night Power",
+    description: "Whisky Black & White com Night Power e gelo.",
+    price: 39.9,
+    category: "Combos",
+    emoji: "🥃",
+    image: "/promotions/black-white-night-power.svg",
+    badge: "Combo",
+    featured: true,
+  },
+  {
+    id: 18,
+    name: "Combo Red Label + Night Power",
+    description: "Whisky Red Label com Night Power e gelo.",
+    price: 59.9,
+    category: "Combos",
+    emoji: "🥃",
+    image: "/promotions/red-label-night-power.svg",
+    badge: "Combo",
+    featured: true,
+  },
+
   // 🍺 CERVEJAS
   {
     id: 1,
@@ -154,6 +178,7 @@ export const menuProducts: Product[] = [
 
 export const menuCategories = [
   "Todos",
+  "Combos",
   "Cervejas",
   "Long Neck",
   "Buchudinha",

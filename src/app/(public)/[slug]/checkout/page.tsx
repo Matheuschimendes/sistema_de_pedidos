@@ -167,7 +167,7 @@ ${itemsText}
   if (!hydrated) {
     return (
       <main className="mx-auto min-h-screen max-w-[480px] bg-zinc-50 p-4">
-        <div className="rounded-2xl bg-white p-4 text-sm text-zinc-500 shadow-sm">
+        <div className="rounded-2xl bg-white p-5 text-base text-zinc-500 shadow-sm">
           Carregando checkout...
         </div>
       </main>
@@ -196,7 +196,7 @@ ${itemsText}
         restaurantLogo={restaurant.logo}
       />
 
-      <div className="flex flex-col gap-3 px-4 pb-32 pt-3">
+      <div className="flex flex-col gap-4 px-4 pb-32 pt-4">
         <OrderSummary items={checkoutItems} subtotal={subtotal} />
 
         <DeliveryOptions value={deliveryType} onChange={setDeliveryType} />

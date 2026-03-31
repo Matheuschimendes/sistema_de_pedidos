@@ -19,8 +19,21 @@ body {
   padding: 0;
 }
 
+html {
+  font-size: 16.5px;
+}
+
 body {
   background: #f8fafc;
   color: #18181b;
   font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 17px;
+  }
 }

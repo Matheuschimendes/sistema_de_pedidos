@@ -6,11 +6,12 @@ export default function AdminEntryPage() {
       <div className="grid w-full max-w-5xl gap-6 md:grid-cols-2">
         <div className="rounded-3xl bg-zinc-900 p-8 text-white shadow-lg">
           <h1 className="text-3xl font-semibold">Área Administrativa</h1>
-          <p className="mt-3 text-zinc-400">
-            Gerencie pedidos, produtos, categorias e o funcionamento do restaurante.
+          <p className="mt-3 text-lg leading-8 text-zinc-300">
+            Gerencie pedidos, produtos, categorias e o funcionamento do
+            restaurante.
           </p>
 
-          <ul className="mt-6 space-y-2 text-sm text-zinc-300">
+          <ul className="mt-6 space-y-2.5 text-base text-zinc-300">
             <li>• Controle de pedidos</li>
             <li>• Gestão de produtos</li>
             <li>• Dashboard com métricas</li>
@@ -36,11 +37,11 @@ export default function AdminEntryPage() {
 
         <div className="rounded-3xl bg-white p-8 shadow-lg">
           <h2 className="text-2xl font-semibold text-zinc-900">Acesso restrito</h2>
-          <p className="mt-3 text-zinc-600">
+          <p className="mt-3 text-lg leading-8 text-zinc-600">
             Esta área é destinada somente para administradores.
           </p>
 
-          <div className="mt-6 space-y-3 text-sm text-zinc-500">
+          <div className="mt-6 space-y-3 text-base leading-7 text-zinc-500">
             <div className="rounded-2xl bg-zinc-50 p-4">
               O cliente final não vê esta área.
             </div>

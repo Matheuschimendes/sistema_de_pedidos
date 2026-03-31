@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { getNameInitials } from "@/src/lib/get-name-initials";
 import { RestaurantBusinessTone } from "@/src/types/restaurant";
 
 type MenuHeroBannerProps = {
@@ -13,20 +12,8 @@ type MenuHeroBannerProps = {
 
 export function MenuHeroBanner({
   restaurantName,
-  restaurantLogo,
   bannerImage,
-  restaurantStatusLabel,
-  restaurantStatusDetail,
-  restaurantStatusTone,
 }: MenuHeroBannerProps) {
-  const restaurantInitials = getNameInitials(restaurantName);
-  const statusClassName =
-    restaurantStatusTone === "open"
-      ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-ink)]"
-      : restaurantStatusTone === "closed"
-        ? "border-[var(--brand-accent)] bg-[var(--brand-accent-soft)] text-[var(--brand-accent-ink)]"
-        : "border-zinc-200 bg-white/70 text-zinc-700";
-
   return (
     <section className="pb-3">
       <div className="relative h-40 w-full overflow-hidden bg-zinc-200">

@@ -1,0 +1,161 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Promocao Red Label com Night Power e gelo">
+  <defs>
+    <linearGradient id="rl-bg" x1="94" y1="42" x2="1110" y2="762" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC"/>
+      <stop offset="0.45" stop-color="#E2E8F0"/>
+      <stop offset="1" stop-color="#CBD5E1"/>
+    </linearGradient>
+    <radialGradient id="rl-halo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(614 302) rotate(90) scale(292 326)">
+      <stop stop-color="#1D4ED8" stop-opacity="0.85"/>
+      <stop offset="0.72" stop-color="#1E3A8A" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#1E293B"/>
+    </radialGradient>
+    <linearGradient id="rl-ice" x1="248" y1="100" x2="958" y2="704" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC" stop-opacity="0.95"/>
+      <stop offset="0.42" stop-color="#BFDBFE" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#93C5FD" stop-opacity="0.22"/>
+    </linearGradient>
+    <linearGradient id="rl-whisky" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#7C2D12"/>
+      <stop offset="0.42" stop-color="#FB923C"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="rl-neck" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#D6B37F"/>
+      <stop offset="1" stop-color="#B45309"/>
+    </linearGradient>
+    <linearGradient id="rl-energy" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#111827"/>
+      <stop offset="0.55" stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#7F1D1D"/>
+    </linearGradient>
+    <linearGradient id="rl-bottle" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#22C55E"/>
+      <stop offset="0.6" stop-color="#15803D"/>
+      <stop offset="1" stop-color="#166534"/>
+    </linearGradient>
+    <linearGradient id="rl-cocktail" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#ECFCCB"/>
+      <stop offset="1" stop-color="#D9F99D"/>
+    </linearGradient>
+    <linearGradient id="rl-beer" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FBBF24"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+    <filter id="rl-shadow" x="114" y="70" width="972" height="632" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#0F172A" flood-opacity="0.22"/>
+    </filter>
+    <filter id="rl-soft-shadow" x="0" y="0" width="1200" height="800" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0F172A" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" rx="52" fill="url(#rl-bg)"/>
+  <ellipse cx="606" cy="742" rx="370" ry="36" fill="#0F172A" opacity="0.16"/>
+
+  <g opacity="0.7">
+    <path d="M314 108C340 64 396 68 410 118C426 66 484 70 496 120C528 90 578 106 576 150C618 120 664 136 664 182C704 152 758 168 760 218" stroke="url(#rl-ice)" stroke-width="20" stroke-linecap="round"/>
+    <path d="M838 168C862 124 920 126 938 174C970 148 1020 162 1024 212C1062 184 1106 208 1100 252" stroke="url(#rl-ice)" stroke-width="18" stroke-linecap="round"/>
+  </g>
+
+  <g filter="url(#rl-shadow)">
+    <circle cx="612" cy="302" r="296" fill="url(#rl-halo)"/>
+    <circle cx="612" cy="302" r="296" fill="url(#rl-ice)" opacity="0.18"/>
+  </g>
+
+  <g opacity="0.32">
+    <path d="M372 130L396 74L438 124" fill="#DBEAFE"/>
+    <path d="M454 86L486 26L534 92" fill="#DBEAFE"/>
+    <path d="M732 78L766 20L812 90" fill="#DBEAFE"/>
+    <path d="M828 100L870 38L914 118" fill="#DBEAFE"/>
+    <path d="M954 170L998 106L1034 188" fill="#DBEAFE"/>
+  </g>
+
+  <g text-anchor="middle" filter="url(#rl-soft-shadow)">
+    <text x="612" y="252" fill="#E0F2FE" font-size="138" font-weight="900" font-family="Arial, sans-serif" letter-spacing="5">
+      GELADAO
+    </text>
+    <text x="612" y="332" fill="#FDE68A" font-size="70" font-weight="800" font-family="Arial, sans-serif" letter-spacing="10">
+      DOS
+    </text>
+    <text x="612" y="430" fill="#FB923C" font-size="116" font-weight="900" font-family="Arial, sans-serif" letter-spacing="4">
+      FERNANDES
+    </text>
+  </g>
+
+  <g transform="translate(140 332)" filter="url(#rl-soft-shadow)">
+    <path d="M44 28C44 14.745 54.745 4 68 4H110C123.255 4 134 14.745 134 28V168H44V28Z" fill="#F8FAFC" opacity="0.92"/>
+    <rect x="24" y="64" width="40" height="84" rx="18" stroke="#F8FAFC" stroke-width="18"/>
+    <path d="M54 56H124V168C124 196.719 100.719 220 72 220C43.2812 220 20 196.719 20 168V94C20 73.0132 37.0132 56 58 56H54Z" fill="url(#rl-beer)"/>
+    <path d="M50 44C62 22 102 22 114 44C122 58 120 74 110 88H54C44 74 42 58 50 44Z" fill="#FFFFFF"/>
+    <circle cx="72" cy="122" r="10" fill="#FDE68A" opacity="0.65"/>
+    <circle cx="100" cy="140" r="8" fill="#FDE68A" opacity="0.42"/>
+    <circle cx="84" cy="170" r="7" fill="#FDE68A" opacity="0.38"/>
+  </g>
+
+  <g transform="translate(286 430)" filter="url(#rl-soft-shadow)">
+    <path d="M0 24C0 10.745 10.745 0 24 0H124L168 176H0V24Z" fill="#1D4ED8" opacity="0.94"/>
+    <path d="M22 18H114L150 158H18C8.05888 158 0 149.941 0 140V24C0 10.745 10.745 0 24 0H22Z" fill="#2563EB"/>
+    <text x="58" y="120" fill="#E0F2FE" font-size="58" font-weight="800" font-family="Arial, sans-serif" transform="rotate(-90 58 120)">
+      GELO
+    </text>
+    <path d="M102 154L126 120L150 154L122 176L102 154Z" fill="#E0F2FE" opacity="0.78"/>
+  </g>
+
+  <g transform="translate(474 160)" filter="url(#rl-soft-shadow)">
+    <rect x="76" width="88" height="102" rx="28" fill="url(#rl-neck)"/>
+    <rect x="96" y="-28" width="48" height="44" rx="16" fill="#B91C1C"/>
+    <rect x="70" y="86" width="100" height="88" rx="26" fill="url(#rl-neck)"/>
+    <path d="M40 154H200V568C200 595.614 177.614 618 150 618H90C42.5035 618 4 579.496 4 532V190C4 170.118 20.1177 154 40 154Z" fill="url(#rl-whisky)"/>
+    <rect x="56" y="270" width="132" height="190" rx="20" fill="#9F1239"/>
+    <path d="M52 312L190 248V294L52 360V312Z" fill="#DC2626"/>
+    <path d="M56 322L194 258" stroke="#FDE68A" stroke-width="10"/>
+    <text x="122" y="328" fill="#FFF7ED" font-size="36" font-weight="900" font-family="Georgia, serif" text-anchor="middle">
+      RED LABEL
+    </text>
+    <text x="122" y="378" fill="#FDE68A" font-size="22" font-weight="700" font-family="Arial, sans-serif" text-anchor="middle">
+      BLENDED SCOTCH
+    </text>
+    <rect x="76" y="486" width="92" height="16" rx="8" fill="#FDE68A" opacity="0.72"/>
+    <rect x="28" y="176" width="36" height="398" rx="18" fill="#FFF7ED" opacity="0.16"/>
+  </g>
+
+  <g transform="translate(720 200)" filter="url(#rl-soft-shadow)">
+    <rect x="40" width="74" height="84" rx="24" fill="#2F1B0A"/>
+    <rect x="26" y="74" width="102" height="470" rx="42" fill="url(#rl-energy)"/>
+    <path d="M76 172L50 246H86L58 338L130 228H88L110 172H76Z" fill="#F59E0B"/>
+    <text x="78" y="390" fill="#FFFFFF" font-size="28" font-weight="900" font-family="Arial, sans-serif" text-anchor="middle">
+      NIGHT
+    </text>
+    <text x="78" y="430" fill="#FFFFFF" font-size="28" font-weight="900" font-family="Arial, sans-serif" text-anchor="middle">
+      POWER
+    </text>
+    <rect x="44" y="488" width="70" height="18" rx="9" fill="#F97316" opacity="0.72"/>
+  </g>
+
+  <g transform="translate(920 262)" filter="url(#rl-soft-shadow)">
+    <path d="M40 0H76L104 224H14L40 0Z" fill="url(#rl-bottle)"/>
+    <rect x="52" y="-30" width="34" height="42" rx="12" fill="#84CC16"/>
+    <path d="M18 126C44 106 78 108 102 132V220H14L18 126Z" fill="#D9F99D" opacity="0.3"/>
+  </g>
+
+  <g transform="translate(924 434)" filter="url(#rl-soft-shadow)">
+    <path d="M26 18H130L112 204H42L26 18Z" fill="#E0F2FE" opacity="0.9"/>
+    <path d="M42 46H116L108 164H50L42 46Z" fill="url(#rl-cocktail)"/>
+    <ellipse cx="76" cy="108" rx="34" ry="34" fill="#A3E635" opacity="0.88"/>
+    <ellipse cx="102" cy="92" rx="32" ry="32" fill="#84CC16" opacity="0.82"/>
+    <rect x="94" y="-6" width="8" height="58" rx="4" fill="#EF4444"/>
+    <path d="M122 54L170 10" stroke="#84CC16" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <g opacity="0.94" filter="url(#rl-soft-shadow)">
+    <path d="M490 688L530 634L574 688L536 730L490 688Z" fill="#F8FAFC"/>
+    <path d="M556 700L594 650L638 700L598 738L556 700Z" fill="#E0F2FE"/>
+    <path d="M624 690L662 644L706 690L664 728L624 690Z" fill="#F8FAFC"/>
+    <path d="M690 700L728 650L772 700L730 740L690 700Z" fill="#DBEAFE"/>
+  </g>
+
+  <text x="600" y="776" fill="#0F172A" font-size="32" font-weight="800" font-family="Arial, sans-serif" text-anchor="middle">
+    O MELHOR DA REGIAO. PECA JA!
+  </text>
+</svg>
