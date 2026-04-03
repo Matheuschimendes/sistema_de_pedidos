@@ -8,6 +8,9 @@ type MenuHeaderProps = {
   restaurantStatusLabel: string;
   restaurantStatusDetail: string;
   restaurantStatusTone: RestaurantBusinessTone;
+  rating: number;
+  reviewCount: number;
+  deliveryFee: number;
   slug: string;
   search: string;
   onSearchChange: (value: string) => void;
@@ -19,6 +22,9 @@ export function MenuHeader({
   restaurantStatusLabel,
   restaurantStatusDetail,
   restaurantStatusTone,
+  rating,
+  reviewCount,
+  deliveryFee,
   slug,
   search,
   onSearchChange,
@@ -26,10 +32,10 @@ export function MenuHeader({
   const restaurantInitials = getNameInitials(restaurantName);
   const statusClassName =
     restaurantStatusTone === "open"
-      ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-ink)]"
+      ? "border-[var(--border-status-open)] bg-[var(--brand-status-open)] text-[var(--status-open-ink)]"
       : restaurantStatusTone === "closed"
-        ? "border-[var(--brand-accent)] bg-[var(--brand-accent-soft)] text-[var(--brand-accent-ink)]"
-        : "border-zinc-200 bg-zinc-100 text-zinc-700";
+        ? "border-[var(--status-closed)] bg-[var(--status-closed-soft)] text-[var(--status-closed-ink)]"
+        : "border-[var(--status-neutral)] bg-[var(--status-neutral-soft)] text-[var(--status-neutral-ink)]";
 
   return (
     <header className="sticky top-0 z-20 border-b border-zinc-100 bg-white px-4 pb-0 pt-4">
@@ -56,7 +62,7 @@ export function MenuHeader({
               {restaurantName}
             </div>
             <div className="text-xs font-medium text-[var(--brand-accent)]">
-              ★ 4.8 · 312 avaliações
+              ★ {rating.toFixed(1)} · {reviewCount} avaliações
             </div>
           </div>
         </div>
@@ -71,7 +77,7 @@ export function MenuHeader({
       <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-zinc-500">
         <span>⌛ {restaurantStatusDetail}</span>
         <span>·</span>
-        <span>📍 Taxa R$ 5,00</span>
+        <span>📍 Taxa R$ {deliveryFee.toFixed(2).replace(".", ",")}</span>
         <span>·</span>
         <span>📱 Pedido pelo app com confirmação rápida</span>
       </div>

@@ -28,7 +28,14 @@ export type RestaurantProfile = {
   bannerImage?: string;
   slug: string;
   name: string;
+  description?: string;
+  highlight?: string;
   logo?: string;
   timeZone: string;
   openingHours?: RestaurantOpeningHours;
+  deliveryFee?: number;
+  deliveryTime?: string;
+  rating?: number;
+  reviewCount?: number;
+  whatsappNumber?: string;
 };

@@ -1,6 +1,7 @@
 import { Cart, Product } from "@/src/types/menu";
 import { formatBRL } from "@/src/lib/format";
 import Link from "next/link";
+import { Trash2 } from "lucide-react";
 
 type CartDrawerProps = {
   open: boolean;
@@ -11,6 +12,7 @@ type CartDrawerProps = {
   total: number;
   slug: string;
   onClose: () => void;
+  onClear: () => void;
   onIncrease: (id: number) => void;
   onDecrease: (id: number) => void;
 };
@@ -24,6 +26,7 @@ export function CartDrawer({
   total,
   slug,
   onClose,
+  onClear,
   onIncrease,
   onDecrease,
 }: CartDrawerProps) {
@@ -53,6 +56,7 @@ export function CartDrawer({
           </div>
 
           <button
+            type="button"
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-base text-zinc-500"
           >
@@ -107,6 +111,19 @@ export function CartDrawer({
         </div>
 
         <div className="border-t border-zinc-100 px-5 py-4">
+          {items.length > 0 ? (
+            <div className="mb-3 flex justify-end">
+              <button
+                type="button"
+                onClick={onClear}
+                className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3.5 py-2 text-xs font-semibold text-red-700 shadow-sm transition hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-100 hover:text-red-800"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Limpar carrinho
+              </button>
+            </div>
+          ) : null}
+
           <div className="mb-1.5 flex justify-between text-sm text-zinc-500">
             <span>Subtotal</span>
             <span>{formatBRL(subtotal)}</span>

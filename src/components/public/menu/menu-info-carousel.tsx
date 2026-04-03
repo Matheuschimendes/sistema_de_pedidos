@@ -6,11 +6,13 @@ import { formatBRL } from "@/src/lib/format";
 type MenuInfoCarouselProps = {
   deliveryFee: number;
   restaurantName: string;
+  deliveryTime?: string;
 };
 
 export function MenuInfoCarousel({
   deliveryFee,
   restaurantName,
+  deliveryTime,
 }: MenuInfoCarouselProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const slideRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -19,7 +21,12 @@ export function MenuInfoCarousel({
     {
       id: "delivery",
       buttonLabel: "entrega e pagamento",
-      content: <MenuQuickInfoCard deliveryFee={deliveryFee} />,
+      content: (
+        <MenuQuickInfoCard
+          deliveryFee={deliveryFee}
+          deliveryTime={deliveryTime}
+        />
+      ),
     },
     {
       id: "tip",
@@ -126,7 +133,13 @@ export function MenuInfoCarousel({
   );
 }
 
-function MenuQuickInfoCard({ deliveryFee }: { deliveryFee: number }) {
+function MenuQuickInfoCard({
+  deliveryFee,
+  deliveryTime,
+}: {
+  deliveryFee: number;
+  deliveryTime?: string;
+}) {
   return (
     <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-r from-[var(--brand-ink)] via-[var(--brand-ink)] to-[var(--brand-primary)] p-5 text-white shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -134,7 +147,8 @@ function MenuQuickInfoCard({ deliveryFee }: { deliveryFee: number }) {
           <div className="text-base font-semibold">Entrega e pagamento</div>
           <div className="mt-1 text-sm leading-6 text-zinc-200">
             Taxa {formatBRL(deliveryFee)} com pagamento via Pix, cartão ou
-            dinheiro. Checkout rápido direto pelo celular.
+            dinheiro. Checkout rápido direto pelo celular
+            {deliveryTime ? ` em média ${deliveryTime}.` : "."}
           </div>
         </div>
 

@@ -4,10 +4,24 @@ export type Product = {
   description: string;
   price: number;
   category: string;
+  additionalInfo?: string;
+  isAvailable?: boolean;
   emoji?: string;
   image?: string;
   badge?: string;
   featured?: boolean;
+};
+
+export type ProductGroup = {
+  id: string;
+  category: string;
+  name: string;
+  description: string;
+  priceFrom: number;
+  itemCount: number;
+  emoji?: string;
+  image?: string;
+  items: Product[];
 };
 
 export type Cart = Record<number, number>;

@@ -66,6 +66,12 @@ export function ProductCard({
           {product.description}
         </div>
 
+        {product.additionalInfo ? (
+          <div className="mt-1 text-[11px] leading-5 text-zinc-400">
+            {product.additionalInfo}
+          </div>
+        ) : null}
+
         <div className="mt-3">
           <div className="mb-2 flex items-center justify-between gap-2">
             <div>

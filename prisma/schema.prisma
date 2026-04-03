@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Restaurant {
+  id              String      @id @default(cuid())
+  slug            String      @unique
+  name            String
+  description     String?
+  highlight       String?
+  logoUrl         String?
+  bannerImageUrl  String?
+  whatsappNumber  String?
+  timeZone        String      @default("America/Fortaleza")
+  openingHours    Json?
+  deliveryFee     Decimal     @default(5) @db.Decimal(10, 2)
+  deliveryTime    String?
+  rating          Float?
+  reviewCount     Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  products        Product[]
+  adminUsers      AdminUser[]
+}
+
+model AdminUser {
+  id           String      @id @default(cuid())
+  name         String
+  email        String      @unique
+  passwordHash String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  restaurantId String?
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
+
+  @@index([restaurantId])
+}
+
+model Product {
+  id             Int        @id @default(autoincrement())
+  name           String
+  description    String
+  price          Decimal    @db.Decimal(10, 2)
+  imageUrl       String
+  category       String
+  additionalInfo String?
+  isAvailable    Boolean    @default(true)
+  badge          String?
+  featured       Boolean    @default(false)
+  emoji          String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  restaurantId   String
+  restaurant     Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId, category])
+  @@index([restaurantId, isAvailable])
+  @@unique([restaurantId, name, category])
+}

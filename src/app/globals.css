@@ -7,6 +7,28 @@
   --brand-accent: #d88818;
   --brand-accent-soft: #fff3d6;
   --brand-accent-ink: #883818;
+  --brand-closer: #dc2626;
+  --brand-status-open: #d1fae5;
+  --border-status-open: #065f46;
+  --status-open-ink: #065f46;
+  --status-closed: #fca5a5;
+  --status-closed-soft: #fee2e2;
+  --status-closed-ink: #991b1b;
+  --status-neutral: #cbd5e1;
+  --status-neutral-soft: #f1f5f9;
+  --status-neutral-ink: #334155;
+  --admin-canvas: #f4f0e8;
+  --admin-canvas-deep: #ebe4d7;
+  --admin-surface: rgba(255, 255, 255, 0.88);
+  --admin-surface-strong: rgba(255, 255, 255, 0.96);
+  --admin-border-soft: rgba(15, 23, 42, 0.08);
+  --admin-border-strong: rgba(15, 23, 42, 0.14);
+  --font-sans:
+    var(--font-app-sans), "Avenir Next", "Segoe UI Variable Text", "Segoe UI",
+    "Helvetica Neue", Helvetica, sans-serif;
+  --font-display:
+    var(--font-app-display), "Iowan Old Style", "Palatino Linotype",
+    "Book Antiqua", Georgia, serif;
 }
 
 * {
@@ -20,20 +42,63 @@ body {
 }
 
 html {
-  font-size: 16.5px;
+  font-size: 16px;
 }
 
 body {
   background: #f8fafc;
   color: #18181b;
-  font-family: Arial, Helvetica, sans-serif;
-  line-height: 1.55;
+  font-family: var(--font-sans);
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
+::selection {
+  background: rgba(88, 136, 184, 0.24);
+  color: #101828;
+}
+
+.font-admin-display {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 32;
+  letter-spacing: -0.055em;
+}
+
+.admin-shell-bg {
+  background-image:
+    radial-gradient(
+      circle at top left,
+      rgba(200, 232, 248, 0.46),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(255, 243, 214, 0.72),
+      transparent 26%
+    ),
+    linear-gradient(180deg, var(--admin-canvas) 0%, #f0ece4 100%);
+}
+
+.admin-paper {
+  background:
+    linear-gradient(
+      180deg,
+      var(--admin-surface-strong) 0%,
+      rgba(249, 246, 240, 0.96) 100%
+    );
+  border: 1px solid var(--admin-border-soft);
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.08);
+}
+
 @media (min-width: 768px) {
   html {
-    font-size: 17px;
+    font-size: 16.35px;
+  }
+}
+
+@media (min-width: 1280px) {
+  html {
+    font-size: 16.65px;
   }
 }
