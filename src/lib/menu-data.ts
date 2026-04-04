@@ -1,6 +1,10 @@
 import { comboCategory } from "@/src/lib/menu-groups";
 import { prisma } from "@/src/lib/prisma";
-import { Product } from "@/src/types/menu";
+import {
+  AdminCategory,
+  AdminCategorySummary,
+  Product,
+} from "@/src/types/menu";
 import { RestaurantOpeningHours, RestaurantProfile } from "@/src/types/restaurant";
 
 type ProductRecord = {
@@ -33,6 +37,11 @@ type RestaurantRecord = {
   reviewCount: number;
 };
 
+type CategoryRecord = {
+  id: string;
+  name: string;
+};
+
 function toNumber(
   value: { toNumber(): number } | number | null | undefined,
 ) {
@@ -48,15 +57,11 @@ function toNumber(
 }
 
 export function buildMenuCategoriesFromProducts(products: Product[]) {
-  const categorySet = new Set<string>();
-
-  for (const product of products) {
-    if (product.category.trim()) {
-      categorySet.add(product.category.trim());
-    }
-  }
-
-  const categories = Array.from(categorySet).sort((left, right) => {
+  const categories = Array.from(
+    new Set(
+      products.map((product) => product.category.trim()).filter((value) => value.length > 0),
+    ),
+  ).sort((left, right) => {
     if (left === comboCategory) return -1;
     if (right === comboCategory) return 1;
 
@@ -64,6 +69,17 @@ export function buildMenuCategoriesFromProducts(products: Product[]) {
   });
 
   return ["Todos", ...categories];
+}
+
+function buildCategoryNames(categories: string[]) {
+  return Array.from(
+    new Set(categories.map((category) => category.trim()).filter((value) => value.length > 0)),
+  ).sort((left, right) => {
+    if (left === comboCategory) return -1;
+    if (right === comboCategory) return 1;
+
+    return left.localeCompare(right, "pt-BR");
+  });
 }
 
 export function mapProductRecordToMenuProduct(product: ProductRecord): Product {
@@ -157,6 +173,20 @@ export async function getAdminProducts(restaurantId: string): Promise<Product[]>
   return products.map(mapProductRecordToMenuProduct);
 }
 
+export async function getAdminCategories(
+  restaurantId: string,
+): Promise<AdminCategory[]> {
+  const categories = await prisma.category.findMany({
+    where: { restaurantId },
+    orderBy: [{ name: "asc" }],
+  });
+
+  return categories.map((category: CategoryRecord) => ({
+    id: category.id,
+    name: category.name,
+  }));
+}
+
 export async function getAdminProductById(
   productId: number,
   restaurantId: string,
@@ -189,8 +219,55 @@ export async function getRestaurantForAdmin(
   return mapRestaurantRecordToProfile(restaurant);
 }
 
-export function getExistingCategories(products: Product[]) {
-  return buildMenuCategoriesFromProducts(products).filter(
-    (category) => category !== "Todos",
+export function getExistingCategories(
+  products: Product[],
+  registeredCategories: string[] = [],
+) {
+  return buildCategoryNames([
+    ...registeredCategories,
+    ...products.map((product) => product.category),
+  ]);
+}
+
+export function buildAdminCategorySummaries(
+  products: Product[],
+  registeredCategories: string[] = [],
+): AdminCategorySummary[] {
+  const categorySummaries = products.reduce((map, product) => {
+    const current = map.get(product.category) ?? {
+      name: product.category,
+      count: 0,
+      availableCount: 0,
+      featuredCount: 0,
+    };
+
+    current.count += 1;
+
+    if (product.isAvailable) {
+      current.availableCount += 1;
+    }
+
+    if (product.featured) {
+      current.featuredCount += 1;
+    }
+
+    map.set(product.category, current);
+    return map;
+  }, new Map<string, AdminCategorySummary>());
+
+  for (const categoryName of buildCategoryNames(registeredCategories)) {
+    if (!categorySummaries.has(categoryName)) {
+      categorySummaries.set(categoryName, {
+        name: categoryName,
+        count: 0,
+        availableCount: 0,
+        featuredCount: 0,
+      });
+    }
+  }
+
+  return Array.from(categorySummaries.values()).sort(
+    (left, right) =>
+      right.count - left.count || left.name.localeCompare(right.name, "pt-BR"),
   );
 }

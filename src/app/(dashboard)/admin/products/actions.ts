@@ -8,7 +8,9 @@ import {
 } from "@/src/lib/admin-auth";
 import { prisma } from "@/src/lib/prisma";
 import {
+  parseCategoryFormData,
   parseProductFormData,
+  type CategoryFormState,
   type ProductFormState,
 } from "@/src/lib/product-validation";
 
@@ -22,10 +24,24 @@ function isUniqueConstraintError(error: unknown) {
 }
 
 function revalidateProductPaths(slug: string) {
+  revalidatePath("/admin/categories");
   revalidatePath("/admin/dashboard");
   revalidatePath("/admin/products");
   revalidatePath(`/${slug}`);
   revalidatePath(`/${slug}/checkout`);
+}
+
+function resolveCategoryRedirectTo(formData: FormData) {
+  const redirectTo = formData.get("redirectTo");
+
+  if (
+    redirectTo === "/admin/categories" ||
+    redirectTo === "/admin/products"
+  ) {
+    return redirectTo;
+  }
+
+  return "/admin/categories";
 }
 
 async function getAdminRestaurantContext() {
@@ -48,6 +64,102 @@ async function getAdminRestaurantContext() {
   };
 }
 
+async function ensureCategoryExists(restaurantId: string, categoryName: string) {
+  const trimmedName = categoryName.trim();
+
+  if (!trimmedName) {
+    return;
+  }
+
+  await prisma.category.upsert({
+    where: {
+      restaurantId_name: {
+        restaurantId,
+        name: trimmedName,
+      },
+    },
+    update: {},
+    create: {
+      restaurantId,
+      name: trimmedName,
+    },
+  });
+}
+
+export async function createCategoryAction(
+  _prevState: CategoryFormState,
+  formData: FormData,
+): Promise<CategoryFormState> {
+  const { restaurantId, restaurantSlug } = await getAdminRestaurantContext();
+  const redirectTo = resolveCategoryRedirectTo(formData);
+  const validatedFields = parseCategoryFormData(formData);
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Revise o nome da categoria e tente novamente.",
+    };
+  }
+
+  const categoryName = validatedFields.data.name;
+  const existingCategory = await prisma.category.findUnique({
+    where: {
+      restaurantId_name: {
+        restaurantId,
+        name: categoryName,
+      },
+    },
+  });
+
+  if (existingCategory) {
+    return {
+      message: "Essa categoria ja esta cadastrada no sistema.",
+    };
+  }
+
+  await prisma.category.create({
+    data: {
+      restaurantId,
+      name: categoryName,
+    },
+  });
+
+  revalidateProductPaths(restaurantSlug);
+  redirect(`${redirectTo}?status=category-created`);
+}
+
+export async function deleteCategoryAction(categoryId: string) {
+  const { restaurantId, restaurantSlug } = await getAdminRestaurantContext();
+  const existingCategory = await prisma.category.findFirst({
+    where: {
+      id: categoryId,
+      restaurantId,
+    },
+  });
+
+  if (!existingCategory) {
+    redirect("/admin/categories?status=category-missing");
+  }
+
+  const linkedProductsCount = await prisma.product.count({
+    where: {
+      restaurantId,
+      category: existingCategory.name,
+    },
+  });
+
+  if (linkedProductsCount > 0) {
+    redirect("/admin/categories?status=category-in-use");
+  }
+
+  await prisma.category.delete({
+    where: { id: categoryId },
+  });
+
+  revalidateProductPaths(restaurantSlug);
+  redirect("/admin/categories?status=category-deleted");
+}
+
 export async function createProductAction(
   _prevState: ProductFormState,
   formData: FormData,
@@ -63,6 +175,8 @@ export async function createProductAction(
   }
 
   try {
+    await ensureCategoryExists(restaurantId, validatedFields.data.category);
+
     await prisma.product.create({
       data: {
         restaurantId,
@@ -122,6 +236,8 @@ export async function updateProductAction(
   }
 
   try {
+    await ensureCategoryExists(restaurantId, validatedFields.data.category);
+
     await prisma.product.update({
       where: { id: productId },
       data: {

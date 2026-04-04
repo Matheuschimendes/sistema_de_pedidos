@@ -31,3 +31,15 @@ export type MenuCategory = {
   name: string;
   image: string;
 };
+
+export type AdminCategory = {
+  id: string;
+  name: string;
+};
+
+export type AdminCategorySummary = {
+  name: string;
+  count: number;
+  availableCount: number;
+  featuredCount: number;
+};

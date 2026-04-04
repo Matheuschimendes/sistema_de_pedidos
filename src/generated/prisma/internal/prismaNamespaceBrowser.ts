@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Restaurant: 'Restaurant',
+  Category: 'Category',
   AdminUser: 'AdminUser',
   Product: 'Product'
 } as const
@@ -92,6 +93,17 @@ export const RestaurantScalarFieldEnum = {
 } as const
 
 export type RestaurantScalarFieldEnum = (typeof RestaurantScalarFieldEnum)[keyof typeof RestaurantScalarFieldEnum]
+
+
+export const CategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  restaurantId: 'restaurantId'
+} as const
+
+export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
 export const AdminUserScalarFieldEnum = {

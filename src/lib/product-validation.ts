@@ -26,6 +26,15 @@ export type ProductFormState =
     }
   | undefined;
 
+export type CategoryFormState =
+  | {
+      errors?: {
+        name?: string[];
+      };
+      message?: string;
+    }
+  | undefined;
+
 export const adminLoginSchema = z.object({
   email: z.string().trim().email("Informe um e-mail valido."),
   password: z.string().trim().min(1, "Informe a senha."),
@@ -75,6 +84,14 @@ const productFormSchema = z.object({
   featured: z.boolean(),
 });
 
+const categoryFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Informe uma categoria com pelo menos 2 caracteres.")
+    .max(40, "Use um nome de categoria com no maximo 40 caracteres."),
+});
+
 export type ProductInput = z.infer<typeof productFormSchema>;
 
 function normalizePrice(value: FormDataEntryValue | null) {
@@ -97,5 +114,11 @@ export function parseProductFormData(formData: FormData) {
     emoji: formData.get("emoji"),
     isAvailable: formData.get("isAvailable") === "on",
     featured: formData.get("featured") === "on",
+  });
+}
+
+export function parseCategoryFormData(formData: FormData) {
+  return categoryFormSchema.safeParse({
+    name: formData.get("name"),
   });
 }

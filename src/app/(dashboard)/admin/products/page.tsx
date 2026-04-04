@@ -1,170 +1,111 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  EyeOff,
-  LayoutGrid,
-  Package,
-  Plus,
-  Search,
-  SlidersHorizontal,
-  Sparkles,
-  SquarePen,
-  Trash2,
-} from "lucide-react";
+import { ArrowUpRight, Plus, Search, Sparkles, SquarePen } from "lucide-react";
 import { AdminShell } from "@/src/components/admin/admin-shell";
-import { deleteProductAction } from "@/src/app/(dashboard)/admin/products/actions";
-import { getAdminProducts, getRestaurantForAdmin } from "@/src/lib/menu-data";
+import { CategoryForm } from "@/src/components/admin/category-form";
+import { createCategoryAction } from "@/src/app/(dashboard)/admin/products/actions";
+import {
+  buildAdminCategorySummaries,
+  getAdminCategories,
+  getAdminProducts,
+  getRestaurantForAdmin,
+} from "@/src/lib/menu-data";
 import {
   getAdminRestaurantId,
   requireAdminSession,
 } from "@/src/lib/admin-auth";
 import { formatBRL } from "@/src/lib/format";
-import { Product } from "@/src/types/menu";
+import { AdminCategorySummary, Product } from "@/src/types/menu";
 
 type PageProps = {
   searchParams: Promise<{
     status?: string;
     category?: string;
     q?: string;
-    tab?: string;
   }>;
 };
-
-type CatalogTabId = "products" | "complements" | "options";
-
-type CategorySummary = {
-  name: string;
-  count: number;
-  availableCount: number;
-  featuredCount: number;
-};
-
-const catalogTabs: Array<{
-  id: CatalogTabId;
-  label: string;
-  description: string;
-}> = [
-  {
-    id: "products",
-    label: "Produtos",
-    description: "Catalogo principal em operacao",
-  },
-  {
-    id: "complements",
-    label: "Complementos",
-    description: "Espaco preparado para proxima etapa",
-  },
-  {
-    id: "options",
-    label: "Opcoes",
-    description: "Espaco preparado para proxima etapa",
-  },
-];
 
 export default async function AdminProductsPage({ searchParams }: PageProps) {
   const session = await requireAdminSession();
   const restaurantId = await getAdminRestaurantId(session);
-  const [{ status, category, q, tab }, restaurant, products] = await Promise.all([
-    searchParams,
-    getRestaurantForAdmin(restaurantId),
-    getAdminProducts(restaurantId),
-  ]);
+  const [{ status, category, q }, restaurant, products, registeredCategories] =
+    await Promise.all([
+      searchParams,
+      getRestaurantForAdmin(restaurantId),
+      getAdminProducts(restaurantId),
+      getAdminCategories(restaurantId),
+    ]);
 
   if (!restaurant) {
     throw new Error("Restaurante nao encontrado.");
   }
 
-  const activeTab = getActiveTab(tab);
   const statusMessage = getStatusMessage(status);
   const searchQuery = q?.trim() ?? "";
 
-  const categorySummaries = Array.from(
-    products
-      .reduce((map, product) => {
-        const current = map.get(product.category) ?? {
-          name: product.category,
-          count: 0,
-          availableCount: 0,
-          featuredCount: 0,
-        };
-
-        current.count += 1;
-
-        if (product.isAvailable) {
-          current.availableCount += 1;
-        }
-
-        if (product.featured) {
-          current.featuredCount += 1;
-        }
-
-        map.set(product.category, current);
-        return map;
-      }, new Map<string, CategorySummary>())
-      .values(),
-  ).sort(
-    (left, right) =>
-      right.count - left.count || left.name.localeCompare(right.name, "pt-BR"),
+  const sortedCategorySummaries = buildAdminCategorySummaries(
+    products,
+    registeredCategories.map((categoryItem) => categoryItem.name),
   );
 
-  const selectedCategory =
-    activeTab === "products" && categorySummaries.some((item) => item.name === category)
-      ? category ?? null
-      : null;
+  const selectedCategory = sortedCategorySummaries.some((item) => item.name === category)
+    ? (category ?? "")
+    : "";
+  const selectedCategorySummary = sortedCategorySummaries.find(
+    (item) => item.name === selectedCategory,
+  );
 
-  const productsByTab =
-    activeTab === "products"
-      ? selectedCategory
-        ? products.filter((product) => product.category === selectedCategory)
-        : products
-      : [];
+  const baseProducts = selectedCategory
+    ? products.filter((product) => product.category === selectedCategory)
+    : products;
+  const filteredProducts = filterProducts(baseProducts, searchQuery);
+  const sortedProducts = [...filteredProducts].sort(
+    (left, right) =>
+      Number(Boolean(right.isAvailable)) - Number(Boolean(left.isAvailable)) ||
+      Number(Boolean(right.featured)) - Number(Boolean(left.featured)) ||
+      right.price - left.price ||
+      left.name.localeCompare(right.name, "pt-BR"),
+  );
 
-  const filteredProducts =
-    searchQuery.length > 0
-      ? productsByTab.filter((product) =>
-          [
-            product.name,
-            product.description,
-            product.category,
-            product.additionalInfo,
-            product.badge,
-          ]
-            .filter(Boolean)
-            .join(" ")
-            .toLocaleLowerCase("pt-BR")
-            .includes(searchQuery.toLocaleLowerCase("pt-BR")),
-        )
-      : productsByTab;
-
-  const availableCount = filteredProducts.filter((product) => product.isAvailable).length;
-  const featuredCount = filteredProducts.filter((product) => product.featured).length;
+  const availableCount = products.filter((product) => Boolean(product.isAvailable)).length;
+  const featuredCount = products.filter((product) => Boolean(product.featured)).length;
   const averagePrice =
-    filteredProducts.length > 0
-      ? filteredProducts.reduce((sum, product) => sum + product.price, 0) /
-        filteredProducts.length
+    products.length > 0
+      ? products.reduce((sum, product) => sum + product.price, 0) / products.length
       : 0;
-  const leadingCategory = categorySummaries[0];
 
   return (
     <AdminShell
       title="Catalogo"
-      description="Organize categorias, revise disponibilidade e mantenha o cardapio com cara de operacao viva."
+      description="Organize produtos, acompanhe categorias e mantenha o cardapio pronto para publicar."
       restaurantName={restaurant.name}
+      restaurantSlug={restaurant.slug}
       userName={session.name}
       currentSection="products"
       actions={
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
+            href="/admin/dashboard"
+            className="inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+          >
+            Ver dashboard
+          </Link>
+          <Link
+            href="/admin/categories"
+            className="inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+          >
+            Ver categorias
+          </Link>
+          <Link
             href={`/${restaurant.slug}`}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-950/8 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:-translate-y-0.5 hover:border-zinc-950/14"
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
           >
             Ver vitrine
             <ArrowUpRight className="h-4 w-4" />
           </Link>
           <Link
             href="/admin/products/new"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,#0d1726_0%,#172840_100%)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(13,23,38,0.16)] transition hover:-translate-y-0.5"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700"
           >
             <Plus className="h-4 w-4" />
             Novo produto
@@ -173,261 +114,197 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
       }
     >
       {statusMessage ? (
-        <div className="mb-5 rounded-[24px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+        <div className="mb-6 rounded-[24px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
           {statusMessage}
         </div>
       ) : null}
 
-      <section className="rounded-[32px] border border-zinc-950/6 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-        <div className="flex flex-col gap-5 border-b border-zinc-950/6 px-5 py-5 md:px-6">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              {catalogTabs.map((catalogTab) => {
-                const isActive = activeTab === catalogTab.id;
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="rounded-[30px] border border-zinc-200 bg-white p-6 shadow-[0_12px_36px_rgba(15,23,42,0.05)] md:p-7">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-violet-500">
+            Catalogo principal
+          </p>
 
-                return (
-                  <Link
-                    key={catalogTab.id}
-                    href={buildProductsHref({
-                      tab: catalogTab.id,
-                      category: catalogTab.id === "products" ? selectedCategory : null,
-                      q: catalogTab.id === "products" ? searchQuery : "",
-                    })}
-                    className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                      isActive
-                        ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-ink)]"
-                        : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:text-zinc-700"
-                    }`}
-                  >
-                    {catalogTab.label}
-                  </Link>
-                );
-              })}
+          <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl">
+              <h2 className="text-[1.9rem] font-semibold tracking-tight text-zinc-950 md:text-[2.1rem]">
+                {selectedCategory
+                  ? `Categoria: ${selectedCategory}`
+                  : "Todos os produtos do menu"}
+              </h2>
+              <p className="mt-3 text-[15px] leading-8 text-zinc-500">
+                {selectedCategorySummary
+                  ? `${selectedCategorySummary.count} itens nesta categoria, com ${selectedCategorySummary.availableCount} publicados e ${selectedCategorySummary.featuredCount} em destaque.`
+                  : "Revise rapidamente o que esta publicado, o que merece destaque e quais grupos concentram mais produtos."}
+              </p>
             </div>
 
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-              <form
-                action="/admin/products"
-                className="flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2.5"
-              >
-                <Search className="h-4 w-4 text-zinc-400" />
-                <input
-                  type="search"
-                  name="q"
-                  defaultValue={searchQuery}
-                  placeholder="Pesquisar no catalogo"
-                  className="w-full min-w-0 bg-transparent text-sm text-zinc-700 outline-none placeholder:text-zinc-400 lg:w-64"
-                />
-                <input type="hidden" name="tab" value={activeTab} />
-                {selectedCategory ? (
-                  <input type="hidden" name="category" value={selectedCategory} />
-                ) : null}
-              </form>
-
-              <div className="inline-flex items-center gap-2 rounded-full border border-dashed border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-semibold text-zinc-500">
-                <SlidersHorizontal className="h-4 w-4" />
-                Edicao em massa em breve
-              </div>
+            <div className="rounded-[22px] border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-700">
+              {products.length} itens cadastrados
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="text-sm text-zinc-500">
-              {catalogTabs.find((catalogTab) => catalogTab.id === activeTab)?.description}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <HeaderChip
-                icon={Package}
-                label={`${products.length} itens totais`}
-              />
-              <HeaderChip
-                icon={Sparkles}
-                label={`${availableCount} ativos no recorte`}
-              />
-              <HeaderChip
-                icon={LayoutGrid}
-                label={`${categorySummaries.length} categorias`}
-              />
-            </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-4">
+            <MetricCard
+              label="Itens totais"
+              value={`${products.length}`}
+              detail="base completa do menu"
+            />
+            <MetricCard
+              label="Publicados"
+              value={`${availableCount}`}
+              detail="visiveis ao cliente"
+            />
+            <MetricCard
+              label="Destaques"
+              value={`${featuredCount}`}
+              detail="com mais evidencia"
+            />
+            <MetricCard
+              label="Ticket medio"
+              value={formatBRL(averagePrice)}
+              detail="media do catalogo"
+            />
           </div>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            <CategoryFilterChip
+              href={buildProductsHref({ category: "", q: searchQuery })}
+              label="Todas"
+              count={products.length}
+              active={!selectedCategory}
+            />
+
+            {sortedCategorySummaries.map((item) => (
+              <CategoryFilterChip
+                key={item.name}
+                href={buildProductsHref({
+                  category: item.name,
+                  q: searchQuery,
+                })}
+                label={item.name}
+                count={item.count}
+                active={selectedCategory === item.name}
+              />
+            ))}
+          </div>
+        </section>
+
+        <aside className="space-y-6">
+          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
+              Nova categoria
+            </p>
+            <p className="mt-3 text-sm leading-7 text-zinc-500">
+              Cadastre categorias antes mesmo de criar os produtos, para deixar
+              o menu organizado desde o primeiro item.
+            </p>
+
+            <CategoryForm
+              action={createCategoryAction}
+              redirectTo="/admin/products"
+            />
+          </section>
+
+          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
+              Categorias do sistema
+            </p>
+
+            <div className="mt-4 space-y-3">
+              {sortedCategorySummaries.length === 0 ? (
+                <div className="rounded-[20px] border border-dashed border-zinc-300 bg-zinc-50 p-4 text-sm text-zinc-500">
+                  Cadastre produtos para montar a leitura de categorias.
+                </div>
+              ) : (
+                sortedCategorySummaries
+                  .slice(0, 6)
+                  .map((categoryItem) => (
+                    <CategorySummaryRow
+                      key={categoryItem.name}
+                      category={categoryItem}
+                    />
+                  ))
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
+              Proximos modulos
+            </p>
+
+            <div className="mt-4 space-y-3">
+              <RoadmapCard
+                title="Complementos"
+                detail="Estrutura pronta para acompanhar adicionais e extras do cardapio."
+              />
+              <RoadmapCard
+                title="Opcoes"
+                detail="Base pensada para suportar escolhas por tamanho, sabores e variacoes."
+              />
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <section className="mt-6 rounded-[30px] border border-zinc-200 bg-white shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
+        <div className="flex flex-col gap-4 border-b border-zinc-200 px-5 py-5 md:px-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
+              Produtos
+            </p>
+            <h3 className="mt-2 text-[1.35rem] font-semibold tracking-tight text-zinc-950">
+              {selectedCategory
+                ? `Itens de ${selectedCategory}`
+                : "Itens para acompanhar"}
+            </h3>
+            <p className="mt-2 text-sm leading-7 text-zinc-500">
+              Busca simples por nome, categoria, badge ou descricao.
+            </p>
+          </div>
+
+          <form
+            action="/admin/products"
+            className="flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2.5"
+          >
+            <Search className="h-4 w-4 text-zinc-400" />
+            <input
+              type="search"
+              name="q"
+              defaultValue={searchQuery}
+              placeholder="Pesquisar no catalogo"
+              className="w-full min-w-0 bg-transparent text-sm text-zinc-700 outline-none placeholder:text-zinc-400 lg:w-72"
+            />
+            {selectedCategory ? (
+              <input type="hidden" name="category" value={selectedCategory} />
+            ) : null}
+          </form>
         </div>
 
-        {activeTab !== "products" ? (
-          <div className="px-5 py-8 md:px-6">
-            <div className="rounded-[28px] border border-dashed border-zinc-300 bg-zinc-50 p-6">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-500 md:text-[11px]">
-                Em construcao
+        {sortedProducts.length === 0 ? (
+          <div className="px-5 py-6 md:px-6">
+            <div className="rounded-[20px] border border-dashed border-zinc-300 bg-zinc-50 p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
+                Sem resultado
               </p>
-              <h3 className="mt-4 text-[1.6rem] font-semibold tracking-tight text-zinc-950">
-                {activeTab === "complements"
-                  ? "Complementos entram na proxima etapa"
-                  : "Opcoes entram na proxima etapa"}
-              </h3>
-              <p className="mt-3 max-w-2xl text-[15px] leading-8 text-zinc-500">
-                A base de produtos principais ja esta pronta. Quando voce quiser,
-                eu posso seguir nessa mesma linguagem visual e montar tambem os
-                fluxos de complementos e opcoes.
+              <h4 className="mt-3 text-[1.2rem] font-semibold tracking-tight text-zinc-950">
+                {products.length === 0
+                  ? "Seu catalogo ainda nao tem itens"
+                  : "Nenhum produto encontrado nesta busca"}
+              </h4>
+              <p className="mt-3 text-sm leading-7 text-zinc-500">
+                {products.length === 0
+                  ? "Cadastre os primeiros produtos para começar a operar o menu por aqui."
+                  : "Ajuste a busca ou troque a categoria para ampliar a leitura do catalogo."}
               </p>
             </div>
           </div>
         ) : (
-          <div className="grid gap-0 xl:grid-cols-[320px_minmax(0,1fr)]">
-            <aside className="border-b border-zinc-950/6 px-5 py-5 xl:border-b-0 xl:border-r xl:px-0 xl:py-0">
-              <div className="flex items-center justify-between xl:px-6 xl:pt-6">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-500 md:text-[11px]">
-                    Categorias
-                  </p>
-                  <h3 className="mt-3 text-[1.25rem] font-semibold tracking-tight text-zinc-950">
-                    Navegacao do catalogo
-                  </h3>
-                </div>
-
-                <Link
-                  href="/admin/products/new"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
-                >
-                  <Plus className="h-4 w-4" />
-                </Link>
-              </div>
-
-              <div className="mt-5 flex gap-3 overflow-x-auto pb-2 xl:hidden">
-                <CategoryPill
-                  href={buildProductsHref({
-                    tab: activeTab,
-                    category: null,
-                    q: searchQuery,
-                  })}
-                  label="Todos"
-                  active={selectedCategory == null}
-                  secondary={`${products.length} itens`}
-                />
-                {categorySummaries.map((item) => (
-                  <CategoryPill
-                    key={item.name}
-                    href={buildProductsHref({
-                      tab: activeTab,
-                      category: item.name,
-                      q: searchQuery,
-                    })}
-                    label={item.name}
-                    active={selectedCategory === item.name}
-                    secondary={`${item.count} itens`}
-                  />
-                ))}
-              </div>
-
-              <div className="mt-6 hidden xl:block">
-                <CategoryRow
-                  href={buildProductsHref({
-                    tab: activeTab,
-                    category: null,
-                    q: searchQuery,
-                  })}
-                  label="Todos os produtos"
-                  detail={`${products.length} itens no catalogo`}
-                  meta={`${products.filter((product) => product.isAvailable).length} ativos`}
-                  active={selectedCategory == null}
-                  showMuted={products.length === 0}
-                />
-
-                {categorySummaries.map((item) => (
-                  <CategoryRow
-                    key={item.name}
-                    href={buildProductsHref({
-                      tab: activeTab,
-                      category: item.name,
-                      q: searchQuery,
-                    })}
-                    label={item.name}
-                    detail={`${item.count} itens nesta categoria`}
-                    meta={`${item.availableCount} ativos`}
-                    active={selectedCategory === item.name}
-                    showMuted={item.availableCount === 0}
-                  />
-                ))}
-              </div>
-
-              <div className="mt-6 rounded-[24px] bg-zinc-50 p-4 xl:mx-6 xl:mb-6">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
-                  Radar rapido
-                </p>
-                <div className="mt-3 space-y-2 text-sm text-zinc-500">
-                  <div>
-                    Categoria lider:
-                    {" "}
-                    <span className="font-semibold text-zinc-900">
-                      {leadingCategory?.name ?? "Sem leitura"}
-                    </span>
-                  </div>
-                  <div>
-                    Destaques ativos:
-                    {" "}
-                    <span className="font-semibold text-zinc-900">
-                      {products.filter((product) => product.featured).length}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </aside>
-
-            <div className="min-w-0 px-5 py-5 md:px-6 md:py-6">
-              <div className="flex flex-col gap-4 border-b border-zinc-950/6 pb-5 lg:flex-row lg:items-start lg:justify-between">
-                <div className="max-w-3xl">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-500 md:text-[11px]">
-                    {selectedCategory ? "Categoria selecionada" : "Visao geral"}
-                  </p>
-                  <h3 className="mt-3 text-[1.9rem] font-semibold tracking-tight text-zinc-950">
-                    {selectedCategory ?? "Todos os produtos"}
-                  </h3>
-                  <p className="mt-3 text-[15px] leading-8 text-zinc-500">
-                    {selectedCategory
-                      ? "Uma leitura focada da categoria escolhida, com status, destaque e acesso direto para edicao."
-                      : "Uma visao completa do catalogo com categorias, status de disponibilidade e organizacao da vitrine."}
-                  </p>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <MetricMini
-                    label="Itens visiveis"
-                    value={`${availableCount}`}
-                  />
-                  <MetricMini
-                    label="Destaques"
-                    value={`${featuredCount}`}
-                  />
-                  <MetricMini
-                    label="Preco medio"
-                    value={formatBRL(averagePrice)}
-                  />
-                </div>
-              </div>
-
-              {filteredProducts.length === 0 ? (
-                <div className="mt-6 rounded-[28px] border border-dashed border-zinc-300 bg-zinc-50 p-6">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-zinc-500 md:text-[11px]">
-                    Sem resultado
-                  </p>
-                  <h4 className="mt-3 text-[1.3rem] font-semibold tracking-tight text-zinc-950">
-                    {products.length === 0
-                      ? "Seu catalogo ainda nao tem produtos"
-                      : "Nenhum item encontrado neste recorte"}
-                  </h4>
-                  <p className="mt-3 max-w-2xl text-[15px] leading-8 text-zinc-500">
-                    {products.length === 0
-                      ? "Comece criando o primeiro produto para preencher o catalogo e liberar a vitrine publica."
-                      : "Tente ajustar a busca ou trocar a categoria selecionada para ampliar a leitura do catalogo."}
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-6 grid gap-4 2xl:grid-cols-2">
-                  {filteredProducts.map((product) => (
-                    <ProductCatalogCard key={product.id} product={product} />
-                  ))}
-                </div>
-              )}
-            </div>
+          <div className="grid gap-4 px-5 py-5 md:px-6 md:py-6 xl:grid-cols-2">
+            {sortedProducts.map((product) => (
+              <CatalogProductCard key={product.id} product={product} />
+            ))}
           </div>
         )}
       </section>
@@ -435,32 +312,44 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
   );
 }
 
-function getActiveTab(tab?: string): CatalogTabId {
-  if (tab === "complements") return "complements";
-  if (tab === "options") return "options";
-  return "products";
+function getStatusMessage(status?: string) {
+  if (status === "category-created") {
+    return "Categoria cadastrada com sucesso.";
+  }
+
+  if (status === "created") {
+    return "Produto cadastrado com sucesso.";
+  }
+
+  if (status === "updated") {
+    return "Produto atualizado com sucesso.";
+  }
+
+  if (status === "deleted") {
+    return "Produto removido do catalogo.";
+  }
+
+  if (status === "missing") {
+    return "O produto solicitado nao foi encontrado.";
+  }
+
+  return null;
 }
 
 function buildProductsHref({
-  tab,
   category,
   q,
 }: {
-  tab: CatalogTabId;
-  category: string | null;
+  category: string;
   q: string;
 }) {
   const params = new URLSearchParams();
 
-  if (tab !== "products") {
-    params.set("tab", tab);
-  }
-
-  if (tab === "products" && category) {
+  if (category) {
     params.set("category", category);
   }
 
-  if (tab === "products" && q) {
+  if (q) {
     params.set("q", q);
   }
 
@@ -468,126 +357,159 @@ function buildProductsHref({
   return query ? `/admin/products?${query}` : "/admin/products";
 }
 
-function HeaderChip({
-  icon: Icon,
-  label,
-}: {
-  icon: typeof Package;
-  label: string;
-}) {
-  return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-sm font-semibold text-zinc-600">
-      <Icon className="h-4 w-4" />
-      {label}
-    </div>
+function filterProducts(products: Product[], searchQuery: string) {
+  if (searchQuery.length === 0) {
+    return products;
+  }
+
+  const normalizedQuery = searchQuery.toLocaleLowerCase("pt-BR");
+
+  return products.filter((product) =>
+    [
+      product.name,
+      product.description,
+      product.category,
+      product.additionalInfo,
+      product.badge,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLocaleLowerCase("pt-BR")
+      .includes(normalizedQuery),
   );
 }
 
-function CategoryPill({
-  href,
-  label,
-  secondary,
-  active,
-}: {
-  href: string;
-  label: string;
-  secondary: string;
-  active: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`min-w-fit rounded-[22px] border px-4 py-3 transition ${
-        active
-          ? "border-[var(--brand-accent)] bg-[var(--brand-accent-soft)] text-[var(--brand-accent-ink)]"
-          : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300"
-      }`}
-    >
-      <div className="text-sm font-semibold">{label}</div>
-      <div className="mt-1 text-xs opacity-75">{secondary}</div>
-    </Link>
-  );
-}
-
-function CategoryRow({
-  href,
-  label,
-  detail,
-  meta,
-  active,
-  showMuted,
-}: {
-  href: string;
-  label: string;
-  detail: string;
-  meta: string;
-  active: boolean;
-  showMuted: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`flex items-start justify-between gap-4 border-l-2 px-6 py-4 transition ${
-        active
-          ? "border-[var(--brand-closer)] bg-zinc-50"
-          : "border-transparent hover:bg-zinc-50"
-      }`}
-    >
-      <div className="min-w-0">
-        <div className="text-[15px] font-semibold text-zinc-900">{label}</div>
-        <div className="mt-1 text-sm text-zinc-500">{detail}</div>
-      </div>
-
-      <div className="flex items-center gap-2 text-sm font-semibold text-zinc-500">
-        {showMuted ? <EyeOff className="h-4 w-4" /> : null}
-        {meta}
-      </div>
-    </Link>
-  );
-}
-
-function MetricMini({
+function MetricCard({
   label,
   value,
+  detail,
 }: {
   label: string;
   value: string;
+  detail: string;
 }) {
   return (
-    <div className="rounded-[22px] border border-zinc-200 bg-zinc-50 px-4 py-3">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
+    <div className="rounded-[22px] border border-zinc-200 bg-zinc-50 px-4 py-4">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
         {label}
       </div>
-      <div className="mt-2 text-[1.05rem] font-semibold text-zinc-950">
+      <div className="mt-2 text-[1.3rem] font-semibold tracking-tight text-zinc-950">
         {value}
+      </div>
+      <div className="mt-1 text-sm text-zinc-500">{detail}</div>
+    </div>
+  );
+}
+
+function CategoryFilterChip({
+  href,
+  label,
+  count,
+  active,
+}: {
+  href: string;
+  label: string;
+  count: number;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition ${
+        active
+          ? "border-violet-200 bg-violet-50 text-violet-700"
+          : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900"
+      }`}
+    >
+      <span>{label}</span>
+      <span
+        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] ${
+          active ? "bg-white text-violet-700" : "bg-zinc-100 text-zinc-500"
+        }`}
+      >
+        {count}
+      </span>
+    </Link>
+  );
+}
+
+function CategorySummaryRow({
+  category,
+}: {
+  category: AdminCategorySummary;
+}) {
+  const publishedRatio =
+    category.count > 0
+      ? Math.round((category.availableCount / category.count) * 100)
+      : 0;
+
+  return (
+    <div className="rounded-[20px] border border-zinc-200 bg-zinc-50 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-sm font-semibold text-zinc-900">
+            {category.name}
+          </div>
+          <div className="mt-1 text-sm text-zinc-500">
+            {category.count} itens e {category.featuredCount} destaque(s)
+          </div>
+        </div>
+
+        <div className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-zinc-700">
+          {publishedRatio}%
+        </div>
+      </div>
+
+      <div className="mt-3 h-2 rounded-full bg-white">
+        <div
+          className="h-2 rounded-full bg-[linear-gradient(90deg,#8b5cf6_0%,#a78bfa_100%)]"
+          style={{ width: `${publishedRatio}%` }}
+        />
       </div>
     </div>
   );
 }
 
-function ProductCatalogCard({
+function RoadmapCard({
+  title,
+  detail,
+}: {
+  title: string;
+  detail: string;
+}) {
+  return (
+    <div className="rounded-[20px] border border-zinc-200 bg-zinc-50 p-4">
+      <div className="inline-flex rounded-2xl bg-violet-100 p-2 text-violet-600">
+        <Sparkles className="h-4 w-4" />
+      </div>
+      <p className="mt-3 text-sm font-semibold text-zinc-950">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-zinc-500">{detail}</p>
+    </div>
+  );
+}
+
+function CatalogProductCard({
   product,
 }: {
   product: Product;
 }) {
   const isAvailable = Boolean(product.isAvailable);
-  const isFeatured = Boolean(product.featured);
   const hasLocalImage = Boolean(product.image?.startsWith("/"));
 
   return (
-    <article className="rounded-[28px] border border-zinc-950/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(246,243,238,0.9)_100%)] p-5 shadow-[0_10px_28px_rgba(15,23,42,0.04)]">
+    <article className="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
       <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="relative h-24 w-full shrink-0 overflow-hidden rounded-[22px] bg-zinc-100 sm:w-28">
+        <div className="relative h-[82px] w-full shrink-0 overflow-hidden rounded-[18px] bg-zinc-100 sm:w-[82px]">
           {hasLocalImage ? (
             <Image
               src={product.image!}
               alt={product.name}
               fill
-              sizes="112px"
+              sizes="82px"
               className="object-cover"
             />
           ) : (
-            <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#f0ece4_0%,#e4edf8_100%)] text-[1.7rem] font-semibold text-zinc-500">
+            <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#f0ece4_0%,#ece8ff_100%)] text-[1rem] font-semibold text-zinc-500">
               {getProductFallback(product.name)}
             </div>
           )}
@@ -597,88 +519,68 @@ function ProductCatalogCard({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                <span className="rounded-md bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
                   {product.category}
                 </span>
-                {isFeatured ? (
-                  <span className="rounded-full bg-[var(--brand-accent-soft)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent-ink)]">
+                {product.featured ? (
+                  <span className="rounded-md bg-violet-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-600">
                     Destaque
                   </span>
                 ) : null}
                 {product.badge ? (
-                  <span className="rounded-full bg-[var(--brand-primary-soft)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--brand-ink)]">
+                  <span className="rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-600">
                     {product.badge}
                   </span>
                 ) : null}
               </div>
 
-              <h3 className="mt-3 text-[1.18rem] font-semibold tracking-tight text-zinc-950">
+              <h4 className="mt-2 text-[1rem] font-semibold tracking-tight text-zinc-950">
                 {product.name}
-              </h3>
-              <p className="mt-2 text-sm leading-7 text-zinc-500">
+              </h4>
+              <p className="mt-1 text-sm leading-6 text-zinc-500">
                 {product.description}
               </p>
 
               {product.additionalInfo ? (
-                <p className="mt-1 text-sm leading-7 text-zinc-500">
+                <p className="mt-1 text-sm leading-6 text-zinc-500">
                   {product.additionalInfo}
                 </p>
               ) : null}
             </div>
 
             <div
-              className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] ${
+              className={`inline-flex rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] ${
                 isAvailable
-                  ? "bg-[var(--brand-status-open)] text-[var(--status-open-ink)]"
-                  : "bg-[var(--status-closed-soft)] text-[var(--status-closed-ink)]"
+                  ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                  : "border-red-200 bg-red-50 text-red-600"
               }`}
             >
               {isAvailable ? "Ativo" : "Oculto"}
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-3 border-t border-zinc-950/6 pt-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mt-3 flex flex-col gap-3 border-t border-zinc-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-zinc-900">
+              <span className="text-[1.05rem] font-semibold text-emerald-700">
                 {formatBRL(product.price)}
               </span>
-              <span className="rounded-full bg-zinc-100 px-3 py-1.5 text-sm font-semibold text-zinc-600">
+              <span className="rounded-md bg-white px-2.5 py-1 text-xs font-semibold text-zinc-600">
                 #{product.id}
               </span>
             </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Link
-                href={`/admin/products/${product.id}/edit`}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
-              >
-                <SquarePen className="h-4 w-4" />
-                Editar
-              </Link>
-
-              <form action={deleteProductAction.bind(null, product.id)}>
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-100"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Excluir
-                </button>
-              </form>
-            </div>
+            <Link
+              href={`/admin/products/${product.id}/edit`}
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-zinc-200 bg-white px-3.5 py-2 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100"
+            >
+              <SquarePen className="h-4 w-4" />
+              Editar
+            </Link>
           </div>
         </div>
       </div>
     </article>
   );
-}
-
-function getStatusMessage(status?: string) {
-  if (status === "created") return "Produto criado com sucesso.";
-  if (status === "updated") return "Produto atualizado com sucesso.";
-  if (status === "deleted") return "Produto excluido com sucesso.";
-  if (status === "missing") return "O produto solicitado nao foi encontrado.";
-  return null;
 }
 
 function getProductFallback(name: string) {

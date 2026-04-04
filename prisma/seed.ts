@@ -227,6 +227,10 @@ const productSeeds = [
   },
 ] as const;
 
+const categorySeeds = Array.from(
+  new Set(productSeeds.map((product) => product.category.trim())),
+).sort((left, right) => left.localeCompare(right, "pt-BR"));
+
 function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const hash = scryptSync(password, salt, 64).toString("hex");
@@ -259,6 +263,22 @@ async function main() {
       restaurantId: restaurant.id,
     },
   });
+
+  for (const categoryName of categorySeeds) {
+    await prisma.category.upsert({
+      where: {
+        restaurantId_name: {
+          restaurantId: restaurant.id,
+          name: categoryName,
+        },
+      },
+      update: {},
+      create: {
+        restaurantId: restaurant.id,
+        name: categoryName,
+      },
+    });
+  }
 
   for (const product of productSeeds) {
     await prisma.product.upsert({

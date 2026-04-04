@@ -25,7 +25,20 @@ model Restaurant {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   products        Product[]
+  categories      Category[]
   adminUsers      AdminUser[]
+}
+
+model Category {
+  id           String      @id @default(cuid())
+  name         String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([restaurantId, name])
+  @@index([restaurantId])
 }
 
 model AdminUser {
