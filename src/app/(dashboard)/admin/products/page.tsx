@@ -17,6 +17,8 @@ import {
 import { formatBRL } from "@/src/lib/format";
 import { AdminCategorySummary, Product } from "@/src/types/menu";
 
+type ProductActionTone = "categories" | "create" | "dashboard" | "storefront";
+
 type PageProps = {
   searchParams: Promise<{
     status?: string;
@@ -83,68 +85,78 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
       userName={session.name}
       currentSection="products"
       actions={
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
           <Link
             href="/admin/dashboard"
-            className="inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+            className={getProductActionButtonClass("dashboard")}
           >
+            <span className={getProductActionIconClass("dashboard")}>
+              <ArrowUpRight className="h-4 w-4" />
+            </span>
             Ver dashboard
           </Link>
           <Link
             href="/admin/categories"
-            className="inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+            className={getProductActionButtonClass("categories")}
           >
+            <span className={getProductActionIconClass("categories")}>
+              <ArrowUpRight className="h-4 w-4" />
+            </span>
             Ver categorias
           </Link>
           <Link
             href={`/${restaurant.slug}`}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+            className={getProductActionButtonClass("storefront")}
           >
+            <span className={getProductActionIconClass("storefront")}>
+              <ArrowUpRight className="h-4 w-4" />
+            </span>
             Ver vitrine
-            <ArrowUpRight className="h-4 w-4" />
           </Link>
           <Link
             href="/admin/products/new"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700"
+            className={getProductActionButtonClass("create")}
           >
-            <Plus className="h-4 w-4" />
+            <span className={getProductActionIconClass("create")}>
+              <Plus className="h-4 w-4" />
+            </span>
             Novo produto
           </Link>
         </div>
       }
     >
       {statusMessage ? (
-        <div className="mb-6 rounded-[24px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+        <div className="mb-5 rounded-[22px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
           {statusMessage}
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="rounded-[30px] border border-zinc-200 bg-white p-6 shadow-[0_12px_36px_rgba(15,23,42,0.05)] md:p-7">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(300px,320px)] 2xl:grid-cols-[minmax(0,1.08fr)_minmax(320px,360px)]">
+        <section className="rounded-[26px] border border-zinc-200 bg-white p-5 shadow-[0_16px_38px_rgba(15,23,42,0.06)] sm:p-6">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-violet-500">
             Catalogo principal
           </p>
 
-          <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="mt-4 flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
             <div className="max-w-3xl">
-              <h2 className="text-[1.9rem] font-semibold tracking-tight text-zinc-950 md:text-[2.1rem]">
+              <h2 className="text-[1.7rem] font-semibold tracking-tight text-zinc-950 md:text-[1.95rem]">
                 {selectedCategory
                   ? `Categoria: ${selectedCategory}`
                   : "Todos os produtos do menu"}
               </h2>
-              <p className="mt-3 text-[15px] leading-8 text-zinc-500">
+              <p className="mt-3 max-w-3xl text-[15px] leading-7 text-zinc-500">
                 {selectedCategorySummary
                   ? `${selectedCategorySummary.count} itens nesta categoria, com ${selectedCategorySummary.availableCount} publicados e ${selectedCategorySummary.featuredCount} em destaque.`
                   : "Revise rapidamente o que esta publicado, o que merece destaque e quais grupos concentram mais produtos."}
               </p>
             </div>
 
-            <div className="rounded-[22px] border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-700">
+            <div className="rounded-[18px] border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-700 shadow-[0_12px_26px_rgba(139,92,246,0.12)]">
               {products.length} itens cadastrados
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-4">
+          <div className="mt-6 grid gap-3 lg:grid-cols-2 2xl:grid-cols-4">
             <MetricCard
               label="Itens totais"
               value={`${products.length}`}
@@ -167,7 +179,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
             />
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap gap-2.5">
             <CategoryFilterChip
               href={buildProductsHref({ category: "", q: searchQuery })}
               label="Todas"
@@ -190,8 +202,8 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        <aside className="space-y-6">
-          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
+        <aside className="grid gap-4 xl:grid-cols-1 2xl:gap-5">
+          <section className="rounded-[26px] border border-zinc-200 bg-white p-5 shadow-[0_16px_38px_rgba(15,23,42,0.06)]">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
               Nova categoria
             </p>
@@ -206,7 +218,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
             />
           </section>
 
-          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
+          <section className="rounded-[26px] border border-zinc-200 bg-white p-5 shadow-[0_16px_38px_rgba(15,23,42,0.06)]">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
               Categorias do sistema
             </p>
@@ -229,7 +241,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
             </div>
           </section>
 
-          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
+          <section className="rounded-[26px] border border-zinc-200 bg-white p-5 shadow-[0_16px_38px_rgba(15,23,42,0.06)]">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
               Proximos modulos
             </p>
@@ -248,7 +260,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
         </aside>
       </div>
 
-      <section className="mt-6 rounded-[30px] border border-zinc-200 bg-white shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
+      <section className="mt-5 rounded-[26px] border border-zinc-200 bg-white shadow-[0_16px_38px_rgba(15,23,42,0.06)]">
         <div className="flex flex-col gap-4 border-b border-zinc-200 px-5 py-5 md:px-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
@@ -266,7 +278,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
 
           <form
             action="/admin/products"
-            className="flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2.5"
+            className="flex w-full items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2.5 lg:w-auto"
           >
             <Search className="h-4 w-4 text-zinc-400" />
             <input
@@ -301,7 +313,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
             </div>
           </div>
         ) : (
-          <div className="grid gap-4 px-5 py-5 md:px-6 md:py-6 xl:grid-cols-2">
+          <div className="grid gap-4 px-5 py-5 md:px-6 md:py-6 xl:grid-cols-2 2xl:grid-cols-3">
             {sortedProducts.map((product) => (
               <CatalogProductCard key={product.id} product={product} />
             ))}
@@ -389,11 +401,11 @@ function MetricCard({
   detail: string;
 }) {
   return (
-    <div className="rounded-[22px] border border-zinc-200 bg-zinc-50 px-4 py-4">
+    <div className="rounded-[18px] border border-zinc-200 bg-zinc-50 px-4 py-4">
       <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
         {label}
       </div>
-      <div className="mt-2 text-[1.3rem] font-semibold tracking-tight text-zinc-950">
+      <div className="mt-2 text-[1.25rem] font-semibold tracking-tight text-zinc-950">
         {value}
       </div>
       <div className="mt-1 text-sm text-zinc-500">{detail}</div>
@@ -444,7 +456,7 @@ function CategorySummaryRow({
       : 0;
 
   return (
-    <div className="rounded-[20px] border border-zinc-200 bg-zinc-50 p-4">
+    <div className="rounded-[18px] border border-zinc-200 bg-zinc-50 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-sm font-semibold text-zinc-900">
@@ -478,7 +490,7 @@ function RoadmapCard({
   detail: string;
 }) {
   return (
-    <div className="rounded-[20px] border border-zinc-200 bg-zinc-50 p-4">
+    <div className="rounded-[18px] border border-zinc-200 bg-[linear-gradient(180deg,#fbfbfd_0%,#f7f8fb_100%)] p-4">
       <div className="inline-flex rounded-2xl bg-violet-100 p-2 text-violet-600">
         <Sparkles className="h-4 w-4" />
       </div>
@@ -497,15 +509,15 @@ function CatalogProductCard({
   const hasLocalImage = Boolean(product.image?.startsWith("/"));
 
   return (
-    <article className="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="relative h-[82px] w-full shrink-0 overflow-hidden rounded-[18px] bg-zinc-100 sm:w-[82px]">
+    <article className="rounded-[22px] border border-zinc-200 bg-[linear-gradient(180deg,#fbfbfd_0%,#f7f8fb_100%)] p-4 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
+      <div className="flex items-start gap-4">
+        <div className="relative h-[76px] w-[76px] shrink-0 overflow-hidden rounded-[18px] bg-zinc-100">
           {hasLocalImage ? (
             <Image
               src={product.image!}
               alt={product.name}
               fill
-              sizes="82px"
+              sizes="76px"
               className="object-cover"
             />
           ) : (
@@ -517,7 +529,7 @@ function CatalogProductCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-md bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
                   {product.category}
@@ -537,12 +549,12 @@ function CatalogProductCard({
               <h4 className="mt-2 text-[1rem] font-semibold tracking-tight text-zinc-950">
                 {product.name}
               </h4>
-              <p className="mt-1 text-sm leading-6 text-zinc-500">
+              <p className="mt-1 line-clamp-2 text-sm leading-6 text-zinc-500">
                 {product.description}
               </p>
 
               {product.additionalInfo ? (
-                <p className="mt-1 text-sm leading-6 text-zinc-500">
+                <p className="mt-1 line-clamp-2 text-sm leading-6 text-zinc-500">
                   {product.additionalInfo}
                 </p>
               ) : null}
@@ -559,7 +571,7 @@ function CatalogProductCard({
             </div>
           </div>
 
-          <div className="mt-3 flex flex-col gap-3 border-t border-zinc-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-zinc-200 pt-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[1.05rem] font-semibold text-emerald-700">
                 {formatBRL(product.price)}
@@ -571,7 +583,7 @@ function CatalogProductCard({
 
             <Link
               href={`/admin/products/${product.id}/edit`}
-              className="inline-flex w-fit items-center gap-2 rounded-full border border-zinc-200 bg-white px-3.5 py-2 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-orange-700 bg-orange-500 px-3.5 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:bg-orange-600 sm:w-fit"
             >
               <SquarePen className="h-4 w-4" />
               Editar
@@ -586,4 +598,34 @@ function CatalogProductCard({
 function getProductFallback(name: string) {
   const parts = name.trim().split(/\s+/).slice(0, 2);
   return parts.map((part) => part[0]?.toUpperCase() ?? "").join("");
+}
+
+function getProductActionButtonClass(tone: ProductActionTone) {
+  const baseClassName =
+    "inline-flex items-center justify-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition";
+
+  switch (tone) {
+    case "dashboard":
+      return `${baseClassName} border-sky-700 bg-sky-600 text-white hover:bg-sky-700`;
+    case "categories":
+      return `${baseClassName} border-amber-300 bg-[linear-gradient(180deg,#fef3c7_0%,#fde68a_100%)] text-amber-950 hover:border-amber-400 hover:bg-[linear-gradient(180deg,#fde68a_0%,#fcd34d_100%)]`;
+    case "storefront":
+      return `${baseClassName} border-teal-700 bg-teal-600 text-white hover:bg-teal-700`;
+    case "create":
+      return `${baseClassName} border-emerald-700 bg-emerald-600 text-white hover:bg-emerald-700`;
+  }
+}
+
+function getProductActionIconClass(tone: ProductActionTone) {
+  const baseClassName =
+    "inline-flex h-7 w-7 items-center justify-center rounded-full";
+
+  switch (tone) {
+    case "categories":
+      return `${baseClassName} bg-white/60 text-amber-900`;
+    case "dashboard":
+    case "storefront":
+    case "create":
+      return `${baseClassName} bg-white/20 text-white`;
+  }
 }

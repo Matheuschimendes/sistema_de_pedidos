@@ -28,8 +28,8 @@ export function OrderSuccess({
       </h1>
 
       <p className="mb-6 max-w-[320px] text-base leading-8 text-zinc-500">
-        Recebemos seu pedido {orderNumber}. Em breve você receberá uma
-        confirmação pelo WhatsApp.
+        Recebemos seu pedido {orderNumber}. A equipe ja consegue acompanhar o
+        andamento e seguir com a confirmacao.
       </p>
 
       <div className="mb-5 w-full rounded-2xl border border-zinc-100 bg-white p-5 text-left">

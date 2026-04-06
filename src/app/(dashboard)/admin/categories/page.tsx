@@ -18,6 +18,8 @@ import {
 } from "@/src/lib/menu-data";
 import { AdminCategorySummary } from "@/src/types/menu";
 
+type CategoryActionTone = "create" | "products" | "storefront";
+
 type PageProps = {
   searchParams: Promise<{
     status?: string;
@@ -68,33 +70,40 @@ export default async function AdminCategoriesPage({
       userName={session.name}
       currentSection="categories"
       actions={
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
           <Link
             href="/admin/products"
-            className="inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+            className={getCategoryActionButtonClass("products")}
           >
+            <span className={getCategoryActionIconClass("products")}>
+              <ArrowUpRight className="h-4 w-4" />
+            </span>
             Gerenciar produtos
           </Link>
           <Link
             href="/admin/products/new"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700"
+            className={getCategoryActionButtonClass("create")}
           >
-            <Plus className="h-4 w-4" />
+            <span className={getCategoryActionIconClass("create")}>
+              <Plus className="h-4 w-4" />
+            </span>
             Novo produto
           </Link>
           <Link
             href={`/${restaurant.slug}`}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+            className={getCategoryActionButtonClass("storefront")}
           >
+            <span className={getCategoryActionIconClass("storefront")}>
+              <ArrowUpRight className="h-4 w-4" />
+            </span>
             Ver vitrine
-            <ArrowUpRight className="h-4 w-4" />
           </Link>
         </div>
       }
     >
       {statusFeedback ? (
         <div
-          className={`mb-6 rounded-[24px] border px-4 py-3 text-sm font-medium ${
+          className={`mb-5 rounded-[22px] border px-4 py-3 text-sm font-medium shadow-[0_12px_28px_rgba(15,23,42,0.05)] ${
             statusFeedback.tone === "success"
               ? "border-emerald-200 bg-emerald-50 text-emerald-700"
               : "border-red-200 bg-red-50 text-red-700"
@@ -104,29 +113,29 @@ export default async function AdminCategoriesPage({
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <section className="rounded-[30px] border border-zinc-200 bg-white p-6 shadow-[0_12px_36px_rgba(15,23,42,0.05)] md:p-7">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(300px,340px)] 2xl:grid-cols-[minmax(0,1.08fr)_minmax(320px,360px)]">
+        <section className="rounded-[26px] border border-zinc-200 bg-white p-5 shadow-[0_16px_38px_rgba(15,23,42,0.06)] sm:p-6">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-violet-500">
             Estrutura do menu
           </p>
 
-          <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="mt-4 flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
             <div className="max-w-3xl">
-              <h2 className="text-[1.9rem] font-semibold tracking-tight text-zinc-950 md:text-[2.1rem]">
+              <h2 className="text-[1.7rem] font-semibold tracking-tight text-zinc-950 md:text-[1.95rem]">
                 Categorias cadastradas
               </h2>
-              <p className="mt-3 text-[15px] leading-8 text-zinc-500">
+              <p className="mt-3 max-w-3xl text-[15px] leading-7 text-zinc-500">
                 Crie categorias primeiro e depois vincule os produtos certos a
                 cada grupo para deixar a navegacao do cardapio mais clara.
               </p>
             </div>
 
-            <div className="rounded-[22px] border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-700">
+            <div className="rounded-[18px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 shadow-[0_12px_26px_rgba(245,158,11,0.12)]">
               {categorySummaries.length} categorias no sistema
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-4">
+          <div className="mt-6 grid gap-3 lg:grid-cols-2 2xl:grid-cols-4">
             <MetricCard
               label="Categorias"
               value={`${categorySummaries.length}`}
@@ -150,8 +159,8 @@ export default async function AdminCategoriesPage({
           </div>
         </section>
 
-        <aside className="space-y-6">
-          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
+        <aside className="grid gap-4 xl:grid-cols-1 2xl:gap-5">
+          <section className="rounded-[26px] border border-zinc-200 bg-white p-5 shadow-[0_16px_38px_rgba(15,23,42,0.06)]">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
               Nova categoria
             </p>
@@ -166,7 +175,7 @@ export default async function AdminCategoriesPage({
             />
           </section>
 
-          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
+          <section className="rounded-[26px] border border-zinc-200 bg-white p-5 shadow-[0_16px_38px_rgba(15,23,42,0.06)]">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
               Boas praticas
             </p>
@@ -181,7 +190,7 @@ export default async function AdminCategoriesPage({
         </aside>
       </div>
 
-      <section className="mt-6 rounded-[30px] border border-zinc-200 bg-white shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
+      <section className="mt-5 rounded-[26px] border border-zinc-200 bg-white shadow-[0_16px_38px_rgba(15,23,42,0.06)]">
         <div className="border-b border-zinc-200 px-5 py-5 md:px-6">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
             Lista de categorias
@@ -211,7 +220,7 @@ export default async function AdminCategoriesPage({
             </div>
           </div>
         ) : (
-          <div className="grid gap-4 px-5 py-5 md:px-6 md:py-6 xl:grid-cols-2">
+          <div className="grid gap-4 px-5 py-5 md:px-6 md:py-6 xl:grid-cols-2 2xl:grid-cols-3">
             {categorySummaries.map((category) => (
               <CategoryCard
                 key={category.name}
@@ -236,11 +245,11 @@ function MetricCard({
   detail: string;
 }) {
   return (
-    <div className="rounded-[22px] border border-zinc-200 bg-zinc-50 px-4 py-4">
+    <div className="rounded-[18px] border border-zinc-200 bg-zinc-50 px-4 py-4">
       <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
         {label}
       </div>
-      <div className="mt-2 text-[1.3rem] font-semibold tracking-tight text-zinc-950">
+      <div className="mt-2 text-[1.25rem] font-semibold tracking-tight text-zinc-950">
         {value}
       </div>
       <div className="mt-1 text-sm text-zinc-500">{detail}</div>
@@ -258,7 +267,7 @@ function CategoryCard({
   const canDelete = Boolean(categoryId) && category.count === 0;
 
   return (
-    <article className="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
+    <article className="rounded-[22px] border border-zinc-200 bg-[linear-gradient(180deg,#fbfbfd_0%,#f7f8fb_100%)] p-4 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-[1rem] font-semibold tracking-tight text-zinc-950">
@@ -271,7 +280,7 @@ function CategoryCard({
           </p>
         </div>
 
-        <div className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-sm font-semibold text-zinc-700">
+        <div className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-800">
           {category.count}
         </div>
       </div>
@@ -295,7 +304,7 @@ function CategoryCard({
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href={buildProductsHref(category.name)}
-            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3.5 py-2 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+            className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100"
           >
             Ver produtos
             <ArrowUpRight className="h-4 w-4" />
@@ -377,4 +386,30 @@ function buildProductsHref(category: string) {
   const params = new URLSearchParams();
   params.set("category", category);
   return `/admin/products?${params.toString()}`;
+}
+
+function getCategoryActionButtonClass(tone: CategoryActionTone) {
+  const baseClassName =
+    "inline-flex items-center justify-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition";
+
+  switch (tone) {
+    case "create":
+      return `${baseClassName} border-emerald-700 bg-emerald-600 text-white hover:bg-emerald-700`;
+    case "products":
+      return `${baseClassName} border-violet-700 bg-violet-600 text-white hover:bg-violet-700`;
+    case "storefront":
+      return `${baseClassName} border-teal-700 bg-teal-600 text-white hover:bg-teal-700`;
+  }
+}
+
+function getCategoryActionIconClass(tone: CategoryActionTone) {
+  const baseClassName =
+    "inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-white";
+
+  switch (tone) {
+    case "create":
+    case "products":
+    case "storefront":
+      return baseClassName;
+  }
 }

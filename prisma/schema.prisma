@@ -7,6 +7,27 @@ datasource db {
   provider = "postgresql"
 }
 
+enum DeliveryType {
+  delivery
+  pickup
+}
+
+enum PaymentMethod {
+  pix
+  credit
+  debit
+  cash
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  preparing
+  ready
+  completed
+  canceled
+}
+
 model Restaurant {
   id              String      @id @default(cuid())
   slug            String      @unique
@@ -27,6 +48,7 @@ model Restaurant {
   products        Product[]
   categories      Category[]
   adminUsers      AdminUser[]
+  orders          Order[]
 }
 
 model Category {
@@ -74,4 +96,42 @@ model Product {
   @@index([restaurantId, category])
   @@index([restaurantId, isAvailable])
   @@unique([restaurantId, name, category])
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  status          OrderStatus   @default(pending)
+  deliveryType    DeliveryType
+  paymentMethod   PaymentMethod
+  customerName    String
+  customerPhone   String
+  customerAddress String?
+  customerNotes   String?
+  subtotal        Decimal       @db.Decimal(10, 2)
+  deliveryFee     Decimal       @db.Decimal(10, 2)
+  discount        Decimal       @default(0) @db.Decimal(10, 2)
+  total           Decimal       @db.Decimal(10, 2)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  restaurantId    String
+  restaurant      Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  items           OrderItem[]
+
+  @@index([restaurantId, createdAt])
+  @@index([restaurantId, status])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  productId   Int?
+  productName String
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  lineTotal   Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
 }

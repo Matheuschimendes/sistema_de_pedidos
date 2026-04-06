@@ -3,7 +3,7 @@ import { RestaurantOpeningHours, RestaurantProfile } from "@/src/types/restauran
 const defaultRestaurantLogo = "/brand/default-restaurant-logo.svg";
 const defaultBannerImage = "/brand/banner.svg";
 const defaultTimeZone = "America/Fortaleza";
-const defaultWhatsappNumber = "5585991223506";
+const defaultWhatsappNumber = "5585982342161";
 const defaultOpeningHours: RestaurantOpeningHours = {
   monday: { open: "10:00", close: "22:00" },
   tuesday: { open: "10:00", close: "22:00" },

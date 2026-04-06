@@ -1,6 +1,7 @@
 "use client";
 
 import { startTransition, useEffect, useMemo, useState } from "react";
+import { createOrderAction } from "@/src/app/(public)/[slug]/checkout/actions";
 import { CheckoutHeader } from "@/src/components/public/checkout/checkout-header";
 import { OrderSummary } from "@/src/components/public/checkout/order-summary";
 import { DeliveryOptions } from "@/src/components/public/checkout/delivery-options";
@@ -40,6 +41,7 @@ export function CheckoutPageClient({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successOrder, setSuccessOrder] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
@@ -110,7 +112,7 @@ export function CheckoutPageClient({
     setCustomer((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (checkoutItems.length === 0) {
       alert("Seu carrinho está vazio.");
       return;
@@ -127,44 +129,45 @@ export function CheckoutPageClient({
     }
 
     setIsSubmitting(true);
+    setSubmitError(null);
+    const whatsappWindow = restaurant.whatsappNumber
+      ? window.open("", "_blank", "noopener,noreferrer")
+      : null;
 
-    const orderNumber = `#${Math.floor(Math.random() * 9000 + 1000)}`;
+    const result = await createOrderAction({
+      slug,
+      deliveryType,
+      paymentMethod,
+      customer,
+      items: checkoutItems.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+      })),
+    });
 
-    const itemsText = checkoutItems
-      .map((item) => `${item.quantity}x ${item.name}`)
-      .join("\n");
+    if (!result.ok) {
+      whatsappWindow?.close();
+      setSubmitError(result.message);
+      setIsSubmitting(false);
+      return;
+    }
 
-    const message = `
-*Novo pedido ${orderNumber}*
+    if (result.whatsappUrl) {
+      if (whatsappWindow) {
+        whatsappWindow.location.href = result.whatsappUrl;
+      } else {
+        window.open(result.whatsappUrl, "_blank", "noopener,noreferrer");
+      }
+    } else {
+      whatsappWindow?.close();
+    }
 
-*Itens:*
-${itemsText}
-
-*Entrega:* ${deliveryType === "delivery" ? "Delivery" : "Retirada"}
-*Pagamento:* ${paymentMethod}
-*Taxa de entrega:* ${deliveryFee > 0 ? `R$ ${deliveryFee.toFixed(2).replace(".", ",")}` : "Grátis"}
-*Total:* R$ ${total.toFixed(2).replace(".", ",")}
-
-*Cliente:* ${customer.name}
-*Telefone:* ${customer.phone}
-*Endereço:* ${customer.address || "Retirada no balcão"}
-*Observações:* ${customer.notes || "Nenhuma"}
-`;
-
-    setTimeout(() => {
-      const whatsappNumber = restaurant.whatsappNumber ?? "5585991223506";
-      const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-        message,
-      )}`;
-
+    startTransition(() => {
       window.localStorage.removeItem(getCartStorageKey(slug));
       window.localStorage.removeItem(getCustomerStorageKey(slug));
-
-      window.open(url, "_blank");
-
-      setSuccessOrder(orderNumber);
+      setSuccessOrder(result.orderNumber);
       setIsSubmitting(false);
-    }, 1300);
+    });
   };
 
   if (!hydrated) {
@@ -220,7 +223,10 @@ ${itemsText}
         total={total}
         showDeliveryFee={deliveryType === "delivery"}
         disabled={isSubmitting || checkoutItems.length === 0}
-        onConfirm={handleConfirm}
+        errorMessage={submitError}
+        onConfirm={() => {
+          void handleConfirm();
+        }}
       />
     </main>
   );

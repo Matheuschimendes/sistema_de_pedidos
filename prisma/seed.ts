@@ -31,7 +31,7 @@ const restaurantSeed = {
   highlight: "Operação piloto pronta para validar pedidos online",
   logoUrl: "/brand/default-restaurant-logo.svg",
   bannerImageUrl: "/brand/banner.svg",
-  whatsappNumber: "5585991223506",
+  whatsappNumber: "5585982342161",
   timeZone: "America/Fortaleza",
   openingHours,
   deliveryFee: 5,

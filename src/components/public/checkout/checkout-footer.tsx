@@ -7,6 +7,7 @@ type CheckoutFooterProps = {
   total: number;
   showDeliveryFee: boolean;
   disabled?: boolean;
+  errorMessage?: string | null;
   onConfirm: () => void;
 };
 
@@ -17,6 +18,7 @@ export function CheckoutFooter({
   total,
   showDeliveryFee,
   disabled,
+  errorMessage,
   onConfirm,
 }: CheckoutFooterProps) {
   return (
@@ -48,8 +50,15 @@ export function CheckoutFooter({
       </div>
 
       <div className="mb-4 text-sm text-zinc-500">
-        Ao confirmar, abriremos o WhatsApp com o pedido pronto para envio.
+        Ao confirmar, seu pedido sera registrado no sistema e, se houver
+        WhatsApp configurado, a conversa sera aberta pronta para envio.
       </div>
+
+      {errorMessage ? (
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {errorMessage}
+        </div>
+      ) : null}
 
       <button
         onClick={onConfirm}
