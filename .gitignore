@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.nextar-reference.html
+src/data/restaurants 2.ts
+src/types/restaurant 2.ts
