@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
+  BarChart3,
   ClipboardList,
   LayoutDashboard,
   LogOut,
@@ -17,7 +18,12 @@ import {
   X,
 } from "lucide-react";
 
-export type AdminSection = "categories" | "dashboard" | "orders" | "products";
+export type AdminSection =
+  | "categories"
+  | "dashboard"
+  | "orders"
+  | "products"
+  | "sales";
 
 type AdminShellFrameProps = {
   title: string;
@@ -57,6 +63,12 @@ const navItems: Array<{
     label: "Produtos",
     icon: Package,
     section: "products",
+  },
+  {
+    href: "/admin/sales",
+    label: "Vendas",
+    icon: BarChart3,
+    section: "sales",
   },
   {
     href: "/admin/categories",
@@ -124,7 +136,7 @@ export function AdminShellFrame({
 
   return (
     <div
-      className={`min-h-screen overflow-x-clip bg-[radial-gradient(circle_at_top_left,#ffffff_0%,#f5f6f8_48%,#eef2ff_100%)] text-zinc-900 xl:grid ${shellGridClassName}`}
+      className={`page-shell min-h-screen overflow-x-clip text-[var(--brand-text)] xl:grid ${shellGridClassName}`}
     >
       <button
         type="button"
@@ -138,7 +150,7 @@ export function AdminShellFrame({
       />
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[292px] max-w-[calc(100vw-20px)] border-r border-zinc-200/80 bg-[linear-gradient(180deg,#fcfcff_0%,#f7f8fc_100%)] shadow-[0_28px_60px_rgba(15,23,42,0.18)] transition-transform duration-300 xl:sticky xl:top-0 xl:z-auto xl:max-h-screen xl:w-auto xl:max-w-none xl:shadow-[inset_-1px_0_0_rgba(228,228,231,0.6)] ${
+        className={`fixed inset-y-0 left-0 z-50 w-[292px] max-w-[calc(100vw-20px)] border-r border-[var(--brand-border)]/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,251,255,0.98)_100%)] shadow-[0_28px_60px_rgba(0,0,0,0.12)] transition-transform duration-300 xl:sticky xl:top-0 xl:z-auto xl:max-h-screen xl:w-auto xl:max-w-none xl:shadow-[inset_-1px_0_0_rgba(213,213,213,0.65)] ${
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } ${shouldHideDesktopLabels ? "xl:overflow-hidden" : "xl:overflow-y-auto"} xl:translate-x-0`}
       >
@@ -160,22 +172,22 @@ export function AdminShellFrame({
                 }`}
                 onClick={closeMobileSidebar}
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#ede9fe_0%,#ddd6fe_100%)] text-violet-700 shadow-[0_10px_26px_rgba(139,92,246,0.16)]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--brand-primary-soft)] text-[var(--brand-primary)] shadow-[0_10px_26px_rgba(0,115,230,0.16)]">
                   <Store className="h-5 w-5" />
                 </div>
 
                 <div className={shouldHideDesktopLabels ? "xl:hidden" : ""}>
-                  <p className="text-[1rem] font-semibold tracking-tight text-zinc-950">
-                    Servido Admin
+                  <p className="text-[1rem] font-semibold tracking-tight text-[var(--brand-ink)]">
+                    Sistema Admin
                   </p>
-                  <p className="text-sm text-zinc-500">Painel de cardapio</p>
+                  <p className="text-sm text-zinc-500">Operação do restaurante</p>
                 </div>
               </Link>
 
               <button
                 type="button"
                 onClick={closeMobileSidebar}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-700 shadow-[0_10px_24px_rgba(15,23,42,0.06)] xl:hidden"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--brand-border)] bg-white text-zinc-700 shadow-[0_10px_24px_rgba(0,0,0,0.06)] xl:hidden"
                 aria-label="Fechar menu lateral"
               >
                 <X className="h-4 w-4" />
@@ -183,7 +195,7 @@ export function AdminShellFrame({
             </div>
 
             <div
-              className={`mt-5 rounded-[24px] border border-zinc-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_14px_30px_rgba(15,23,42,0.06)] ${
+              className={`mt-5 rounded-[24px] border border-[var(--brand-border)]/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_14px_30px_rgba(0,0,0,0.05)] ${
                 shouldHideDesktopLabels
                   ? "p-3 xl:flex xl:flex-col xl:items-center"
                   : "p-4"
@@ -200,8 +212,8 @@ export function AdminShellFrame({
                   {getInitials(restaurantName)}
                 </div>
 
-                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="font-ui-mono inline-flex items-center gap-2 rounded-full border border-[var(--border-status-open)] bg-[var(--brand-status-open)] px-3 py-1 text-[10px] uppercase tracking-[0.02em] text-[var(--status-open-ink)]">
+                  <span className="h-2 w-2 rounded-full bg-[var(--brand-success)]" />
                   {shouldHideDesktopLabels ? (
                     <span className="xl:hidden">Online</span>
                   ) : (
@@ -229,7 +241,7 @@ export function AdminShellFrame({
             }`}
           >
             <p
-              className={`px-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 ${
+              className={`font-ui-mono px-2 text-[10px] uppercase tracking-[0.02em] text-[var(--brand-primary)] ${
                 shouldHideDesktopLabels ? "xl:hidden" : ""
               }`}
             >
@@ -270,11 +282,11 @@ export function AdminShellFrame({
             </nav>
 
             <div
-              className={`mt-5 rounded-[24px] border border-zinc-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-4 shadow-[0_14px_30px_rgba(15,23,42,0.06)] ${
+              className={`mt-5 rounded-[24px] border border-[var(--brand-border)]/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-4 shadow-[0_14px_30px_rgba(0,0,0,0.05)] ${
                 shouldHideDesktopLabels ? "xl:hidden" : ""
               }`}
             >
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
+              <p className="font-ui-mono text-[10px] uppercase tracking-[0.02em] text-[var(--brand-primary)]">
                 Acesso rapido
               </p>
               <p className="mt-3 text-sm leading-7 text-zinc-500">
@@ -302,19 +314,19 @@ export function AdminShellFrame({
           </div>
 
           <div
-            className={`border-t border-zinc-200/80 ${
+            className={`border-t border-[var(--brand-border)]/80 ${
               shouldHideDesktopLabels ? "px-3 py-4 xl:px-3" : "px-4 py-5 xl:px-5 xl:py-5"
             }`}
           >
             <div
-              className={`rounded-[22px] border border-zinc-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_12px_28px_rgba(15,23,42,0.05)] ${
+              className={`rounded-[22px] border border-[var(--brand-border)]/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_12px_28px_rgba(0,0,0,0.05)] ${
                 shouldHideDesktopLabels ? "p-3 xl:hidden" : "px-4 py-3"
               }`}
             >
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
+              <p className="font-ui-mono text-[10px] uppercase tracking-[0.02em] text-[var(--brand-primary)]">
                 Secao atual
               </p>
-              <p className="mt-2 text-sm font-semibold text-zinc-950">
+              <p className="mt-2 text-sm font-semibold text-[var(--brand-ink)]">
                 {activeSection}
               </p>
               <p className="mt-1 text-sm leading-6 text-zinc-500">
@@ -326,7 +338,7 @@ export function AdminShellFrame({
               <button
                 type="submit"
                 title="Sair do painel"
-                className={`inline-flex w-full items-center justify-center gap-2 border border-rose-300 bg-rose-50 text-sm font-semibold text-rose-700 transition hover:border-rose-400 hover:bg-rose-100 ${
+                className={`inline-flex w-full items-center justify-center gap-2 border border-[var(--brand-danger)]/18 bg-[var(--brand-danger-soft)] text-sm font-semibold text-[var(--brand-danger-ink)] transition hover:border-[var(--brand-danger)]/28 hover:bg-[var(--brand-danger-soft)] ${
                   shouldHideDesktopLabels
                     ? "rounded-2xl px-3 py-3 xl:h-11 xl:w-full xl:px-0"
                     : "rounded-full px-4 py-3"
@@ -343,14 +355,14 @@ export function AdminShellFrame({
       </aside>
 
       <div className="min-w-0">
-        <header className="border-b border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(245,246,248,0.92)_100%)] backdrop-blur xl:sticky xl:top-0 xl:z-20 xl:border-zinc-200/80">
+        <header className="border-b border-[var(--brand-border)]/75 bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(248,251,255,0.94)_100%)] backdrop-blur xl:sticky xl:top-0 xl:z-20">
           <div className="px-4 py-3 md:px-6 xl:px-6 2xl:px-8">
             <div className="flex flex-col gap-3 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(320px,auto)] xl:items-center xl:gap-4">
               <div className="flex items-start gap-3">
                 <button
                   type="button"
                   onClick={toggleSidebar}
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-700 shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition hover:bg-zinc-50"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[var(--brand-border)] bg-white text-zinc-700 shadow-[0_10px_24px_rgba(0,0,0,0.05)] transition hover:bg-zinc-50"
                   aria-label={
                     isDesktopCollapsed ? "Abrir menu lateral" : "Fechar menu lateral"
                   }
@@ -368,10 +380,10 @@ export function AdminShellFrame({
                 </button>
 
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
+                  <p className="font-ui-mono text-[10px] uppercase tracking-[0.02em] text-[var(--brand-primary)]">
                     {activeSection}
                   </p>
-                  <h1 className="mt-1 text-[1.22rem] font-semibold tracking-tight text-zinc-950 md:text-[1.38rem] 2xl:text-[1.5rem]">
+                  <h1 className="mt-1 text-[1.22rem] font-semibold tracking-tight text-[var(--brand-ink)] md:text-[1.38rem] 2xl:text-[1.5rem]">
                     {title}
                   </h1>
                   <p className="mt-1 hidden max-w-2xl text-sm leading-6 text-zinc-500 2xl:block">
@@ -382,7 +394,7 @@ export function AdminShellFrame({
 
               {actions ? (
                 <div className="min-w-0 xl:w-full xl:max-w-[760px] xl:justify-self-end">
-                  <div className="rounded-[18px] border border-zinc-200/80 bg-white/75 p-1 shadow-[0_10px_20px_rgba(15,23,42,0.05)]">
+                  <div className="rounded-[18px] border border-[var(--brand-border)]/80 bg-white/80 p-1 shadow-[0_10px_20px_rgba(0,0,0,0.05)]">
                     <div className="overflow-x-auto">
                       <div className="min-w-max">{actions}</div>
                     </div>
@@ -434,7 +446,7 @@ function getInitials(value: string) {
 }
 
 function getAdminNavButtonClass(
-  section: AdminSection,
+  _section: AdminSection,
   isActive: boolean,
   isCompact: boolean,
 ) {
@@ -442,32 +454,11 @@ function getAdminNavButtonClass(
     ? "flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm font-semibold transition xl:justify-center xl:px-0"
     : "flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm font-semibold transition";
 
-  switch (section) {
-    case "dashboard":
-      return `${baseClassName} ${
-        isActive
-          ? "border border-violet-200 bg-violet-50 text-violet-700"
-          : "text-violet-700 hover:bg-violet-50/70"
-      }`;
-    case "orders":
-      return `${baseClassName} ${
-        isActive
-          ? "border border-sky-200 bg-sky-50 text-sky-700"
-          : "text-sky-700 hover:bg-sky-50/70"
-      }`;
-    case "products":
-      return `${baseClassName} ${
-        isActive
-          ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-          : "text-emerald-700 hover:bg-emerald-50/70"
-      }`;
-    case "categories":
-      return `${baseClassName} ${
-        isActive
-          ? "border border-amber-200 bg-amber-50 text-amber-800"
-          : "text-amber-800 hover:bg-amber-50/70"
-      }`;
-  }
+  return `${baseClassName} ${
+    isActive
+      ? "border border-[var(--brand-primary)]/18 bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+      : "text-zinc-600 hover:bg-white hover:text-[var(--brand-ink)]"
+  }`;
 }
 
 function getAdminNavIconClass(
@@ -483,24 +474,32 @@ function getAdminNavIconClass(
     case "dashboard":
       return `${baseClassName} ${
         isActive
-          ? "bg-violet-100 text-violet-700"
-          : "bg-violet-50 text-violet-600"
+          ? "bg-[var(--brand-primary)] text-white"
+          : "bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
       }`;
     case "orders":
       return `${baseClassName} ${
-        isActive ? "bg-sky-100 text-sky-700" : "bg-sky-50 text-sky-600"
+        isActive
+          ? "bg-[var(--brand-primary)] text-white"
+          : "bg-[var(--brand-accent-soft)] text-[var(--brand-accent-ink)]"
       }`;
     case "products":
       return `${baseClassName} ${
         isActive
-          ? "bg-emerald-100 text-emerald-700"
-          : "bg-emerald-50 text-emerald-600"
+          ? "bg-[var(--brand-primary)] text-white"
+          : "bg-[var(--brand-success-soft)] text-[var(--brand-success-ink)]"
+      }`;
+    case "sales":
+      return `${baseClassName} ${
+        isActive
+          ? "bg-[var(--brand-primary)] text-white"
+          : "bg-indigo-100 text-indigo-700"
       }`;
     case "categories":
       return `${baseClassName} ${
         isActive
-          ? "bg-amber-100 text-amber-800"
-          : "bg-amber-50 text-amber-700"
+          ? "bg-[var(--brand-primary)] text-white"
+          : "border border-[var(--brand-border)] bg-white text-zinc-600"
       }`;
   }
 }
@@ -511,8 +510,8 @@ function getSidebarLinkClass(tone: "site" | "storefront") {
 
   switch (tone) {
     case "storefront":
-      return `${baseClassName} border-teal-200 bg-teal-50 text-teal-700 hover:border-teal-300 hover:bg-teal-100`;
+      return `${baseClassName} border-[var(--brand-primary)]/18 bg-[var(--brand-primary-soft)] text-[var(--brand-primary)] hover:border-[var(--brand-primary)]/28 hover:bg-[var(--brand-primary-soft)]`;
     case "site":
-      return `${baseClassName} border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100`;
+      return `${baseClassName} border-[rgba(0,0,0,0.9)] bg-white text-[var(--brand-ink)] hover:bg-black/[0.03]`;
   }
 }

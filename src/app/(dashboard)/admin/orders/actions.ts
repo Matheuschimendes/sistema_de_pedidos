@@ -44,6 +44,7 @@ type OrderActionResult =
 function revalidateOrderPaths() {
   revalidatePath("/admin/dashboard");
   revalidatePath("/admin/orders");
+  revalidatePath("/admin/sales");
 }
 
 async function getAdminOrderContext(orderId: string) {

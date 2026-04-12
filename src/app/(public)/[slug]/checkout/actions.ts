@@ -259,6 +259,7 @@ export async function createOrderAction(
 
   revalidatePath("/admin/dashboard");
   revalidatePath("/admin/orders");
+  revalidatePath("/admin/sales");
   revalidatePath(`/${restaurant.slug}/checkout`);
 
   return {
