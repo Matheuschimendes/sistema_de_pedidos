@@ -124,7 +124,7 @@ export function MenuInfoCarousel({
             aria-label={`Ver ${slide.buttonLabel}`}
             aria-current={activeIndex === index ? "true" : undefined}
             onClick={() => scrollToIndex(index)}
-            className={`h-1.5 w-1.5 rounded-full transition-colors ${activeIndex === index ? "bg-[var(--brand-primary)]" : "bg-zinc-300"
+            className={`h-1.5 w-1.5 rounded-full transition-colors ${activeIndex === index ? "bg-[var(--brand-primary)]" : "bg-[var(--brand-border)]"
               }`}
           />
         ))}
@@ -140,20 +140,27 @@ function MenuQuickInfoCard({
   deliveryFee: number;
   deliveryTime?: string;
 }) {
+  const deliveryFeeToCombine = /combinar/i.test(deliveryTime ?? "");
+  const deliveryFeeCopy = deliveryFeeToCombine
+    ? "Taxa a combinar"
+    : deliveryFee > 0
+      ? `Taxa ${formatBRL(deliveryFee)}`
+      : "Taxa grátis";
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-r from-[var(--brand-ink)] via-[var(--brand-ink)] to-[var(--brand-primary)] p-5 text-white shadow-sm">
+    <div className="overflow-hidden rounded-[24px] border border-[#0d58a8] bg-[linear-gradient(135deg,#0f1115_0%,#13365b_48%,#0073e6_100%)] p-5 text-white shadow-[0_16px_34px_rgba(0,115,230,0.18)]">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-base font-semibold">Entrega e pagamento</div>
           <div className="mt-1 text-sm leading-6 text-zinc-200">
-            Taxa {formatBRL(deliveryFee)} com pagamento via Pix, cartão ou
-            dinheiro. Checkout rápido direto pelo celular
+            {deliveryFeeCopy} com pagamento via Pix, cartão ou dinheiro.
+            Checkout rápido direto pelo celular
             {deliveryTime ? ` em média ${deliveryTime}.` : "."}
           </div>
         </div>
 
-        <div className="shrink-0 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white">
-          Info
+        <div className="font-ui-mono shrink-0 rounded-full border border-white/16 bg-white/12 px-3 py-1 text-[11px] uppercase tracking-[0.02em] text-white">
+          Entrega
         </div>
       </div>
     </div>
@@ -162,10 +169,10 @@ function MenuQuickInfoCard({
 
 function MenuTipCard({ restaurantName }: { restaurantName: string }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-br from-[var(--brand-primary-soft)] via-white to-[var(--brand-accent-soft)] p-5 shadow-sm">
+    <div className="overflow-hidden rounded-[24px] border border-[var(--brand-border)] bg-[linear-gradient(135deg,#ffffff_0%,#f8fbff_56%,#fffaf0_100%)] p-5 shadow-[0_14px_30px_rgba(0,0,0,0.05)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-base font-semibold text-zinc-900">
+          <div className="text-base font-semibold text-[var(--brand-ink)]">
             Faça seu pedido de forma rápida e prática
           </div>
           <div className="mt-1 text-sm leading-6 text-zinc-600">
@@ -174,7 +181,7 @@ function MenuTipCard({ restaurantName }: { restaurantName: string }) {
           </div>
         </div>
 
-        <div className="shrink-0 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-xs font-semibold text-[var(--brand-ink)]">
+        <div className="font-ui-mono shrink-0 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[11px] uppercase tracking-[0.02em] text-[var(--brand-primary)]">
           Dica
         </div>
       </div>

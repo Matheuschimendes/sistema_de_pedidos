@@ -23,7 +23,7 @@ export function OrderSuccess({
         ✓
       </div>
 
-      <h1 className="mb-2 text-3xl font-semibold text-zinc-900">
+      <h1 className="mb-2 text-3xl font-semibold text-[var(--brand-ink)]">
         Pedido confirmado!
       </h1>
 
@@ -32,8 +32,8 @@ export function OrderSuccess({
         andamento e seguir com a confirmacao.
       </p>
 
-      <div className="mb-5 w-full rounded-2xl border border-zinc-100 bg-white p-5 text-left">
-        <div className="mb-3 text-xs font-semibold uppercase tracking-[0.08em] text-zinc-400">
+      <div className="ds-panel mb-5 w-full p-5 text-left">
+        <div className="font-ui-mono mb-3 text-[11px] uppercase tracking-[0.02em] text-[var(--brand-primary)]">
           Resumo do pedido
         </div>
 
@@ -46,14 +46,14 @@ export function OrderSuccess({
               <span className="leading-6">
                 {item.quantity}× {item.name}
               </span>
-              <strong className="text-zinc-900">
+              <strong className="text-[var(--brand-ink)]">
                 {formatBRL(item.quantity * item.price)}
               </strong>
             </div>
           ))}
         </div>
 
-        <div className="mt-4 flex justify-between border-t border-zinc-100 pt-4 text-base font-semibold">
+        <div className="mt-4 flex justify-between border-t border-[var(--brand-border)]/75 pt-4 text-base font-semibold">
           <span>Total pago</span>
           <span className="text-[var(--brand-accent)]">{formatBRL(total)}</span>
         </div>
@@ -68,7 +68,7 @@ export function OrderSuccess({
 
       <Link
         href={`/${slug}`}
-        className="rounded-xl bg-[var(--brand-primary)] px-7 py-3.5 text-base font-semibold text-white"
+        className="rounded-[16px] bg-[var(--brand-primary)] px-7 py-3.5 text-base font-semibold text-white shadow-[0_14px_28px_rgba(0,115,230,0.18)] transition hover:bg-[var(--brand-primary-strong)]"
       >
         Voltar ao cardápio
       </Link>

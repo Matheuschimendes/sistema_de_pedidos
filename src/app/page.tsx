@@ -1,45 +1,157 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import type { ReactNode } from "react";
 import {
   ArrowRight,
-  Clock3,
-  LayoutDashboard,
-  PackageCheck,
+  BarChart3,
+  CheckCircle2,
+  CreditCard,
+  MessageCircle,
+  Package,
   ShoppingBag,
-  Smartphone,
+  Star,
   Store,
   Truck,
+  type LucideIcon,
 } from "lucide-react";
 import { menuCategories, menuProducts } from "@/src/data/menu-products";
 import { getRestaurants } from "@/src/data/restaurants";
 import { formatBRL } from "@/src/lib/format";
 import { getRestaurantBusinessStatus } from "@/src/lib/get-restaurant-business-status";
 
-const pillars = [
+type MockVariant = "dashboard" | "products" | "orders" | "reports";
+
+const navigationItems = [
+  { href: "#beneficios", label: "Beneficios" },
+  { href: "#funcionalidades", label: "Funcionalidades" },
+  { href: "#faq", label: "FAQ" },
+];
+
+const moduleItems = [
+  { icon: Store, label: "Cardapio" },
+  { icon: ShoppingBag, label: "Pedidos" },
+  { icon: MessageCircle, label: "WhatsApp" },
+  { icon: CreditCard, label: "Checkout" },
+  { icon: Package, label: "Produtos" },
+  { icon: BarChart3, label: "Relatorios" },
+];
+
+const benefitCards = [
   {
     icon: ShoppingBag,
-    title: "Fluxo público pronto",
-    description:
-      "Cardápio, categorias, grupos de produtos, carrinho e checkout já conectados.",
+    title: "Controle de pedidos",
+    description: "Receba, acompanhe e organize cada pedido em um fluxo simples.",
   },
   {
-    icon: Smartphone,
-    title: "Pedido no WhatsApp",
-    description:
-      "O cliente confirma o pedido no celular com resumo completo e dados de entrega.",
+    icon: Package,
+    title: "Cadastro rapido",
+    description: "Atualize produtos, categorias e destaques sem complicacao.",
   },
   {
-    icon: LayoutDashboard,
-    title: "Painel inicial do dono",
-    description:
-      "O administrador já tem uma visão clara de catálogo, métricas e próximos ajustes.",
+    icon: MessageCircle,
+    title: "WhatsApp integrado",
+    description: "Continue o atendimento com mais contexto e menos retrabalho.",
+  },
+  {
+    icon: BarChart3,
+    title: "Relatorios claros",
+    description: "Veja o que vende mais e tome decisoes com rapidez.",
   },
 ];
 
-const steps = [
-  "Compartilhe o link do restaurante e deixe o cliente entrar direto no cardápio.",
-  "O cliente monta o pedido, escolhe entrega ou retirada e informa os dados.",
-  "O restaurante recebe a solicitação pelo WhatsApp e opera o MVP sem integração pesada.",
+const showcaseItems = [
+  {
+    eyebrow: "Painel de controle",
+    title: "Tenha a operacao da loja em uma visao clara.",
+    description:
+      "Um painel simples para acompanhar pedidos, cardapio e os numeros principais do dia.",
+    bullets: [
+      "Visao geral da operacao",
+      "Indicadores essenciais",
+      "Acesso rapido as principais areas",
+    ],
+    variant: "dashboard" as MockVariant,
+  },
+  {
+    eyebrow: "Cadastro de produtos",
+    title: "Atualize o catalogo em poucos cliques.",
+    description:
+      "Organize categorias, destaque os itens mais fortes e mantenha a vitrine sempre atualizada.",
+    bullets: [
+      "Categorias bem organizadas",
+      "Precos e destaques editaveis",
+      "Disponibilidade mais clara",
+    ],
+    variant: "products" as MockVariant,
+  },
+  {
+    eyebrow: "Pedidos online",
+    title: "Receba pedidos com uma jornada mais fluida.",
+    description:
+      "Do cardapio ao checkout, o cliente entende rapido o que fazer e conclui com menos atrito.",
+    bullets: [
+      "Carrinho simples de revisar",
+      "Entrega e retirada no mesmo fluxo",
+      "Resumo pronto para atendimento",
+    ],
+    variant: "orders" as MockVariant,
+  },
+  {
+    eyebrow: "Relatorios",
+    title: "Enxergue o que esta acontecendo no negocio.",
+    description:
+      "Acompanhe ticket medio, itens fortes e movimentacao da loja em uma leitura objetiva.",
+    bullets: [
+      "Vendas e ticket medio",
+      "Produtos mais relevantes",
+      "Base para decisoes mais rapidas",
+    ],
+    variant: "reports" as MockVariant,
+  },
+];
+
+const testimonials = [
+  {
+    quote:
+      "Ficou muito mais facil apresentar o catalogo e receber pedidos sem confusao.",
+    author: "Camila Yamada",
+    role: "Loja piloto",
+  },
+  {
+    quote:
+      "A interface passa mais confianca e ajuda o cliente a entender rapido o produto.",
+    author: "Lucas Fernandes",
+    role: "Operacao local",
+  },
+  {
+    quote:
+      "O fluxo no celular ficou limpo e o time ganhou mais clareza no atendimento.",
+    author: "Marina Costa",
+    role: "Delivery regional",
+  },
+];
+
+const faqItems = [
+  {
+    question: "Posso testar o sistema sem configuracao complexa?",
+    answer:
+      "Sim. A landing leva para rotas reais do projeto e mostra a experiencia do produto de forma imediata.",
+  },
+  {
+    question: "A pagina foi pensada para conversao?",
+    answer:
+      "Sim. A estrutura reforca beneficios, repete CTA ao longo da pagina e organiza melhor a narrativa comercial.",
+  },
+  {
+    question: "O layout funciona bem no celular?",
+    answer:
+      "Sim. A pagina foi organizada em abordagem mobile-first com blocos claros, espacamento generoso e leitura rapida.",
+  },
+  {
+    question: "Da para evoluir essa base depois?",
+    answer:
+      "Da. A composicao foi pensada para crescer com mais modulos, mais provas sociais e novas integracoes.",
+  },
 ];
 
 export default async function HomePage() {
@@ -50,338 +162,854 @@ export default async function HomePage() {
     ...restaurant,
     businessStatus: getRestaurantBusinessStatus(restaurant, now),
   }));
+
   const primaryRestaurant = restaurants[0];
-  const liveCategories = menuCategories.filter(
-    (category) => category !== "Todos",
-  ).length;
+  const categories = menuCategories.filter((category) => category !== "Todos");
   const featuredProducts = menuProducts.filter((product) => product.featured);
+  const previewProducts = featuredProducts.slice(0, 3);
+  const avgTicket =
+    menuProducts.length > 0
+      ? menuProducts.reduce((sum, product) => sum + product.price, 0) /
+        menuProducts.length
+      : 0;
+  const heroCtaHref = primaryRestaurant ? `/${primaryRestaurant.slug}` : "/admin";
+  const averageRating = primaryRestaurant?.rating?.toFixed(1) ?? "4.8";
+  const totalReviews = primaryRestaurant?.reviewCount ?? 0;
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(200,232,248,0.45),_transparent_38%),linear-gradient(180deg,_#f8fafc_0%,_#eef4fb_100%)]">
-      <section className="mx-auto max-w-6xl px-6 pb-8 pt-8 md:pb-12 md:pt-10">
-        <div className="mb-6 flex flex-col gap-3 rounded-[28px] border border-white/70 bg-white/80 px-5 py-4 shadow-[0_20px_80px_rgba(8,8,40,0.08)] backdrop-blur md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--brand-primary)]">
-              Sistema de Pedidos
+    <main className="min-h-screen bg-white text-[#111827]">
+      <header className="sticky top-0 z-40 border-b border-black/5 bg-white/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-5 py-4 md:px-6">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E8FFF1] text-[#00C853] shadow-[0_12px_24px_rgba(0,200,83,0.14)]">
+              <Store className="h-5 w-5" />
             </div>
-            <p className="mt-1 text-sm text-zinc-500">
-              MVP focado em cardápio digital, checkout rápido e operação simples.
-            </p>
-          </div>
+            <div>
+              <div className="text-base font-semibold text-[#111827]">
+                Sistema de Pedidos
+              </div>
+              <div className="text-xs font-medium uppercase tracking-[0.16em] text-[#6B7280]">
+                gestao e vendas
+              </div>
+            </div>
+          </Link>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Link
-              href={primaryRestaurant ? `/${primaryRestaurant.slug}` : "/admin"}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--brand-ink)] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5"
-            >
-              Abrir cardápio
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+          <nav className="hidden items-center gap-7 lg:flex">
+            {navigationItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-[#6B7280] transition hover:text-[#111827]"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
+          <div className="flex items-center gap-3">
             <Link
-              href="/admin/dashboard"
-              className="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-5 py-3 text-sm font-semibold text-zinc-700 transition hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
+              href="/admin/login"
+              className="hidden text-sm font-medium text-[#6B7280] transition hover:text-[#111827] md:inline-flex"
             >
-              Ver dashboard
+              Entrar
             </Link>
+            <PrimaryButton href={heroCtaHref} compact>
+              Teste gratis
+            </PrimaryButton>
           </div>
         </div>
+      </header>
 
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-[32px] border border-white/70 bg-white/85 p-7 shadow-[0_24px_90px_rgba(8,8,40,0.1)] backdrop-blur md:p-10">
-            <span className="inline-flex rounded-full border border-[var(--brand-primary)]/10 bg-[var(--brand-primary-soft)] px-4 py-1.5 text-sm font-semibold text-[var(--brand-ink)]">
-              MVP pronto para validar com restaurante real
-            </span>
+      <section className="overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(0,200,83,0.14),transparent_32%),linear-gradient(180deg,#FFFFFF_0%,#F5F7FA_100%)]">
+        <div className="mx-auto grid max-w-[1200px] gap-12 px-5 pb-20 pt-12 md:px-6 md:pb-24 md:pt-16 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.95fr)] lg:items-center">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#D8F5E2] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#00A844] shadow-[0_10px_22px_rgba(0,0,0,0.04)]">
+              <span className="h-2 w-2 rounded-full bg-[#00C853]" />
+              Teste 14 dias gratis
+            </div>
 
-            <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight text-zinc-950 md:text-6xl">
-              Venda pelo celular com uma operação enxuta e fácil de testar.
+            <h1 className="mt-6 max-w-[11ch] text-[clamp(3rem,7vw,5.4rem)] font-semibold leading-[0.93] tracking-[-0.06em] text-[#111827]">
+              Venda mais com seu cardapio digital.
             </h1>
 
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-600">
-              A base já cobre descoberta do restaurante, navegação no cardápio,
-              carrinho, checkout e confirmação via WhatsApp. O próximo passo é
-              validar com pedidos reais e refinar a operação.
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-[#6B7280]">
+              Organize pedidos, produtos e atendimento em um sistema moderno,
+              simples e pronto para converter visitantes em clientes.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              {primaryRestaurant ? (
-                <Link
-                  href={`/${primaryRestaurant.slug}`}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--brand-primary)] px-6 py-3.5 text-base font-semibold text-white transition hover:-translate-y-0.5"
-                >
-                  Acessar restaurante piloto
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              ) : null}
-
-              <Link
-                href="/admin"
-                className="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-6 py-3.5 text-base font-semibold text-zinc-700 transition hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
-              >
-                Entrar na área administrativa
-              </Link>
+              <PrimaryButton href={heroCtaHref}>Teste gratis</PrimaryButton>
+              <SecondaryButton href="#demo">Ver demonstracao</SecondaryButton>
             </div>
 
-            <div className="mt-10 grid gap-3 sm:grid-cols-3">
-              <HighlightMetric
-                label="Restaurantes ativos"
-                value={`${restaurants.length}`}
-                caption="estrutura pronta para crescer"
-              />
-              <HighlightMetric
-                label="Produtos publicados"
-                value={`${menuProducts.length}`}
-                caption={`${featuredProducts.length} combos em destaque`}
-              />
-              <HighlightMetric
-                label="Categorias no cardápio"
-                value={`${liveCategories}`}
-                caption="catálogo organizado para mobile"
-              />
+            <div className="mt-8 flex flex-wrap items-center gap-6">
+              <StatBadge value={averageRating} label="avaliacao media" />
+              <StatBadge value={`${totalReviews}+`} label="usuarios satisfeitos" />
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3 text-sm text-[#6B7280]">
+              <TrustItem text="Sem cartao" />
+              <TrustItem text="Configuracao rapida" />
+              <TrustItem text="Suporte por WhatsApp" />
             </div>
           </div>
 
-          {primaryRestaurant ? (
-            <aside className="overflow-hidden rounded-[32px] border border-[var(--brand-ink)]/20 bg-[linear-gradient(160deg,_rgba(8,8,40,0.98)_0%,_rgba(32,48,73,0.96)_54%,_rgba(88,136,184,0.9)_100%)] p-7 text-white shadow-[0_24px_90px_rgba(8,8,40,0.18)]">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/80">
-                <Store className="h-3.5 w-3.5" />
-                Operação piloto
-              </div>
-
-              <h2 className="mt-5 text-3xl font-semibold">
-                {primaryRestaurant.name}
-              </h2>
-
-              <p className="mt-3 text-sm leading-7 text-white/74">
-                {primaryRestaurant.description}
-              </p>
-
-              <div className="mt-6 grid gap-3">
-                <LiveInfoCard
-                  title={primaryRestaurant.businessStatus.label}
-                  description={primaryRestaurant.businessStatus.detail}
-                  tone={primaryRestaurant.businessStatus.tone}
-                  icon={Clock3}
-                />
-                <LiveInfoCard
-                  title={`${primaryRestaurant.rating?.toFixed(1)} estrelas`}
-                  description={`${primaryRestaurant.reviewCount} avaliações e fluxo pronto para compartilhamento`}
-                  tone="neutral"
-                  icon={PackageCheck}
-                />
-                <LiveInfoCard
-                  title={`Entrega ${formatBRL(primaryRestaurant.deliveryFee ?? 0)}`}
-                  description={`Previsão média de ${primaryRestaurant.deliveryTime}`}
-                  tone="neutral"
-                  icon={Truck}
-                />
-              </div>
-
-              <div className="mt-6 rounded-[24px] border border-white/10 bg-white/10 p-4">
-                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/65">
-                  Link pronto para teste
-                </div>
-                <div className="mt-2 break-all text-sm font-medium text-white">
-                  /{primaryRestaurant.slug}
-                </div>
-                <p className="mt-2 text-sm leading-6 text-white/70">
-                  Use esse link para validar descoberta, carrinho e checkout com
-                  clientes reais.
-                </p>
-              </div>
-            </aside>
-          ) : null}
+          <HeroMockup
+            restaurantName={primaryRestaurant?.name ?? "Loja piloto"}
+            statusLabel={primaryRestaurant?.businessStatus.label ?? "Online"}
+            statusDetail={primaryRestaurant?.businessStatus.detail ?? "Disponivel"}
+            deliveryTime={primaryRestaurant?.deliveryTime ?? "20-35 min"}
+            categoriesCount={categories.length}
+            avgTicket={formatBRL(avgTicket)}
+            products={previewProducts}
+          />
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-4 md:py-8">
-        <div className="grid gap-4 md:grid-cols-3">
-          {pillars.map(({ icon: Icon, title, description }) => (
-            <article
-              key={title}
-              className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_18px_60px_rgba(8,8,40,0.08)]"
-            >
-              <div className="inline-flex rounded-2xl bg-[var(--brand-primary-soft)] p-3 text-[var(--brand-ink)]">
-                <Icon className="h-5 w-5" />
-              </div>
-              <h2 className="mt-4 text-xl font-semibold text-zinc-900">
-                {title}
-              </h2>
-              <p className="mt-2 text-sm leading-7 text-zinc-600">
-                {description}
-              </p>
-            </article>
-          ))}
+      <section className="border-y border-black/5 bg-white">
+        <div className="mx-auto max-w-[1200px] px-5 py-5 md:px-6">
+          <div className="flex flex-wrap gap-3">
+            {moduleItems.map((item) => (
+              <ModulePill key={item.label} icon={item.icon} label={item.label} />
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-6 px-6 py-8 md:grid-cols-[1.1fr_0.9fr] md:py-12">
-        <div className="rounded-[32px] border border-white/70 bg-white/85 p-7 shadow-[0_20px_70px_rgba(8,8,40,0.08)]">
-          <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--brand-primary)]">
-            <Store className="h-4 w-4" />
-            Restaurante disponível
-          </div>
-
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
-            Entrada pública do sistema já conectada ao cardápio real
-          </h2>
-
-          <p className="mt-3 max-w-2xl text-base leading-8 text-zinc-600">
-            Em vez de uma landing genérica, o MVP agora apresenta a operação do
-            restaurante e leva direto para a experiência que o cliente de fato
-            vai usar.
-          </p>
-
-          <div className="mt-6 grid gap-4">
-            {restaurants.map((restaurant) => (
-              <article
-                key={restaurant.slug}
-                className="rounded-[28px] border border-zinc-100 bg-[linear-gradient(180deg,_#ffffff_0%,_rgba(200,232,248,0.18)_100%)] p-5"
-              >
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <div className="text-xl font-semibold text-zinc-900">
-                      {restaurant.name}
-                    </div>
-                    <p className="mt-2 max-w-xl text-sm leading-7 text-zinc-600">
-                      {restaurant.description}
-                    </p>
-                  </div>
-
-                  <div
-                    className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                      restaurant.businessStatus.tone === "open"
-                        ? "bg-[var(--brand-status-open)] text-[var(--status-open-ink)]"
-                        : "bg-[var(--status-closed-soft)] text-[var(--status-closed-ink)]"
-                    }`}
-                  >
-                    {restaurant.businessStatus.label}
-                  </div>
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-2 text-sm text-zinc-500">
-                  <span className="rounded-full bg-white px-3 py-1.5">
-                    {restaurant.businessStatus.detail}
-                  </span>
-                  <span className="rounded-full bg-white px-3 py-1.5">
-                    Taxa {formatBRL(restaurant.deliveryFee ?? 0)}
-                  </span>
-                  <span className="rounded-full bg-white px-3 py-1.5">
-                    {restaurant.deliveryTime}
-                  </span>
-                </div>
-
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                  <Link
-                    href={`/${restaurant.slug}`}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--brand-primary)] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5"
-                  >
-                    Abrir cardápio
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-
-                  <Link
-                    href={`/${restaurant.slug}/checkout`}
-                    className="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white px-5 py-3 text-sm font-semibold text-zinc-700 transition hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
-                  >
-                    Ver checkout
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-
-        <aside className="rounded-[32px] border border-[var(--brand-accent)]/10 bg-[linear-gradient(180deg,_#fffaf2_0%,_#ffffff_100%)] p-7 shadow-[0_20px_70px_rgba(216,136,24,0.08)]">
-          <div className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--brand-accent)]">
-            Como o MVP funciona
-          </div>
-
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
-            Um fluxo simples, validável e sem depender de integrações pesadas
-          </h2>
-
-          <div className="mt-6 space-y-4">
-            {steps.map((step, index) => (
-              <div
-                key={step}
-                className="flex gap-4 rounded-[24px] border border-white bg-white/85 p-4"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--brand-accent-soft)] font-semibold text-[var(--brand-accent-ink)]">
-                  {index + 1}
-                </div>
-                <p className="text-sm leading-7 text-zinc-600">{step}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 rounded-[24px] bg-[var(--brand-ink)] p-5 text-white">
-            <div className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
-              Próxima fase
-            </div>
-            <p className="mt-2 text-sm leading-7 text-white/78">
-              Depois da validação inicial, podemos evoluir para autenticação,
-              gestão de produtos, painel de pedidos em tempo real e persistência
-              em banco.
+      <section id="beneficios" className="bg-[#F5F7FA]">
+        <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-6 md:py-24">
+          <div className="max-w-2xl">
+            <SectionEyebrow>Beneficios principais</SectionEyebrow>
+            <SectionTitle>
+              Tudo o que voce precisa para vender com mais clareza.
+            </SectionTitle>
+            <p className="mt-4 max-w-xl text-base leading-7 text-[#6B7280]">
+              A pagina destaca beneficios reais do sistema, com linguagem curta,
+              visual limpo e foco em conversao.
             </p>
           </div>
-        </aside>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {benefitCards.map((card) => (
+              <BenefitCard key={card.title} {...card} />
+            ))}
+          </div>
+
+          <InlineCta
+            className="mt-10"
+            title="Comece a testar agora e veja a vitrine funcionando."
+            href={heroCtaHref}
+            label="Quero testar gratis"
+          />
+        </div>
+      </section>
+
+      <section id="funcionalidades" className="bg-white">
+        <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-6 md:py-24">
+          <div className="max-w-2xl">
+            <SectionEyebrow>Funcionalidades</SectionEyebrow>
+            <SectionTitle>
+              Recursos pensados para uma operacao mais simples.
+            </SectionTitle>
+          </div>
+
+          <div className="mt-12 space-y-16">
+            {showcaseItems.map((item, index) => (
+              <FeatureShowcase
+                key={item.title}
+                reverse={index % 2 === 1}
+                eyebrow={item.eyebrow}
+                title={item.title}
+                description={item.description}
+                bullets={item.bullets}
+                variant={item.variant}
+                categoriesCount={categories.length}
+                featuredCount={featuredProducts.length}
+                avgTicket={formatBRL(avgTicket)}
+                products={previewProducts}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="demo" className="bg-[#F5F7FA]">
+        <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-6 md:py-24">
+          <div className="max-w-2xl">
+            <SectionEyebrow>Demonstracao do sistema</SectionEyebrow>
+            <SectionTitle>
+              Veja como o produto aparece na pratica.
+            </SectionTitle>
+            <p className="mt-4 max-w-xl text-base leading-7 text-[#6B7280]">
+              Mockups limpos para reforcar a sensacao de produto SaaS real e
+              profissional.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-4 lg:grid-cols-3">
+            <DemoCard
+              title="Dashboard"
+              subtitle="Visao geral da operacao"
+              variant="dashboard"
+              categoriesCount={categories.length}
+              featuredCount={featuredProducts.length}
+              avgTicket={formatBRL(avgTicket)}
+              products={previewProducts}
+            />
+            <DemoCard
+              title="Produtos"
+              subtitle="Catalogo organizado"
+              variant="products"
+              categoriesCount={categories.length}
+              featuredCount={featuredProducts.length}
+              avgTicket={formatBRL(avgTicket)}
+              products={previewProducts}
+            />
+            <DemoCard
+              title="Pedidos"
+              subtitle="Fluxo mais claro"
+              variant="orders"
+              categoriesCount={categories.length}
+              featuredCount={featuredProducts.length}
+              avgTicket={formatBRL(avgTicket)}
+              products={previewProducts}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white">
+        <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-6 md:py-24">
+          <div className="max-w-2xl">
+            <SectionEyebrow>Prova social</SectionEyebrow>
+            <SectionTitle>
+              Quem usa gosta da rapidez e da clareza do sistema.
+            </SectionTitle>
+          </div>
+
+          <div className="mt-10 grid gap-4 lg:grid-cols-3">
+            {testimonials.map((item) => (
+              <TestimonialCard key={item.author} {...item} />
+            ))}
+          </div>
+
+          <InlineCta
+            className="mt-10"
+            title="Transforme visitantes em usuarios com uma experiencia mais profissional."
+            href={heroCtaHref}
+            label="Testar agora"
+          />
+        </div>
+      </section>
+
+      <section id="faq" className="bg-[#F5F7FA]">
+        <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-6 md:py-24">
+          <div className="max-w-2xl">
+            <SectionEyebrow>FAQ</SectionEyebrow>
+            <SectionTitle>
+              Perguntas comuns antes de comecar.
+            </SectionTitle>
+          </div>
+
+          <div className="mt-10 space-y-4">
+            {faqItems.map((item) => (
+              <FaqItem
+                key={item.question}
+                question={item.question}
+                answer={item.answer}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white">
+        <div className="mx-auto max-w-[1200px] px-5 pb-16 pt-6 md:px-6 md:pb-20">
+          <div className="rounded-[32px] bg-[#1E293B] px-6 py-8 text-white shadow-[0_24px_80px_rgba(30,41,59,0.18)] md:px-8 md:py-10">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">
+                  CTA final
+                </div>
+                <h2 className="mt-3 text-[clamp(2rem,4vw,3.2rem)] font-semibold leading-[1.02] tracking-[-0.045em]">
+                  Pronto para vender mais com um sistema mais profissional?
+                </h2>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-white/72 md:text-base">
+                  Crie sua conta, teste gratis e veja a diferenca de uma landing
+                  clara combinada com um produto bem apresentado.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <PrimaryButton href={heroCtaHref}>Comecar agora gratis</PrimaryButton>
+                <SecondaryButton href="/admin/dashboard" dark>
+                  Ver painel
+                </SecondaryButton>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   );
 }
 
-function HighlightMetric({
-  label,
-  value,
-  caption,
+function PrimaryButton({
+  href,
+  children,
+  compact = false,
 }: {
-  label: string;
-  value: string;
-  caption: string;
+  href: string;
+  children: ReactNode;
+  compact?: boolean;
 }) {
   return (
-    <div className="rounded-[24px] border border-zinc-100 bg-[linear-gradient(180deg,_#ffffff_0%,_rgba(200,232,248,0.22)_100%)] p-4">
-      <div className="text-sm text-zinc-500">{label}</div>
-      <div className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-        {value}
-      </div>
-      <div className="mt-1 text-sm text-zinc-500">{caption}</div>
+    <Link
+      href={href}
+      className={`inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#00C853] font-semibold text-white transition hover:bg-[#00A844] ${
+        compact ? "px-4 py-2.5 text-sm" : "px-5 py-3.5 text-base"
+      }`}
+    >
+      {children}
+      {!compact ? <ArrowRight className="h-4 w-4" /> : null}
+    </Link>
+  );
+}
+
+function SecondaryButton({
+  href,
+  children,
+  dark = false,
+}: {
+  href: string;
+  children: ReactNode;
+  dark?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex items-center justify-center rounded-[10px] border px-5 py-3.5 text-base font-semibold transition ${
+        dark
+          ? "border-white/18 bg-white/8 text-white hover:bg-white/12"
+          : "border-[#D7DEE7] bg-white text-[#111827] hover:border-[#00C853]/30 hover:text-[#00A844]"
+      }`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function SectionEyebrow({ children }: { children: ReactNode }) {
+  return (
+    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#00A844]">
+      {children}
     </div>
   );
 }
 
-function LiveInfoCard({
-  title,
-  description,
-  tone,
-  icon: Icon,
-}: {
-  title: string;
-  description: string;
-  tone: "open" | "closed" | "neutral";
-  icon: typeof Clock3;
-}) {
-  const accentClassName =
-    tone === "open"
-      ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-50"
-      : tone === "closed"
-        ? "border-red-300/20 bg-red-300/10 text-red-50"
-        : "border-white/10 bg-white/10 text-white";
-
+function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <div className={`rounded-[24px] border p-4 ${accentClassName}`}>
-      <div className="flex items-center gap-3">
-        <div className="inline-flex rounded-2xl bg-black/15 p-2.5">
-          <Icon className="h-4 w-4" />
-        </div>
-        <div>
-          <div className="text-sm font-semibold">{title}</div>
-          <div className="mt-1 text-sm leading-6 text-current/75">
-            {description}
+    <h2 className="mt-3 text-[clamp(2rem,4vw,3.2rem)] font-semibold leading-[1.02] tracking-[-0.05em] text-[#111827]">
+      {children}
+    </h2>
+  );
+}
+
+function StatBadge({
+  value,
+  label,
+}: {
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-full border border-[#E5E7EB] bg-white px-4 py-2.5 shadow-[0_10px_22px_rgba(0,0,0,0.04)]">
+      <div className="flex items-center gap-1 text-[#00C853]">
+        <Star className="h-4 w-4 fill-current" />
+        <Star className="h-4 w-4 fill-current" />
+        <Star className="h-4 w-4 fill-current" />
+        <Star className="h-4 w-4 fill-current" />
+        <Star className="h-4 w-4 fill-current" />
+      </div>
+      <div className="text-sm font-semibold text-[#111827]">{value}</div>
+      <div className="text-sm text-[#6B7280]">{label}</div>
+    </div>
+  );
+}
+
+function TrustItem({ text }: { text: string }) {
+  return (
+    <div className="rounded-full border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#6B7280]">
+      {text}
+    </div>
+  );
+}
+
+function HeroMockup({
+  restaurantName,
+  statusLabel,
+  statusDetail,
+  deliveryTime,
+  categoriesCount,
+  avgTicket,
+  products,
+}: {
+  restaurantName: string;
+  statusLabel: string;
+  statusDetail: string;
+  deliveryTime: string;
+  categoriesCount: number;
+  avgTicket: string;
+  products: typeof menuProducts;
+}) {
+  return (
+    <div className="relative">
+      <div className="absolute inset-x-10 top-10 h-44 rounded-full bg-[#00C853]/16 blur-3xl" />
+      <div className="relative rounded-[32px] border border-[#E5E7EB] bg-white p-4 shadow-[0_30px_90px_rgba(17,24,39,0.10)]">
+        <div className="rounded-[28px] border border-[#E5E7EB] bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-4">
+          <div className="flex items-center justify-between gap-3 border-b border-[#EEF2F7] pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E8FFF1] text-[#00C853]">
+                <Store className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-[#111827]">
+                  {restaurantName}
+                </div>
+                <div className="text-xs text-[#6B7280]">{statusDetail}</div>
+              </div>
+            </div>
+
+            <div className="rounded-full bg-[#E8FFF1] px-3 py-1 text-xs font-semibold text-[#00A844]">
+              {statusLabel}
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-[24px] bg-[#1E293B] p-5 text-white shadow-[0_20px_34px_rgba(30,41,59,0.20)]">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
+              sistema ao vivo
+            </div>
+            <div className="mt-2 text-2xl font-semibold leading-tight">
+              Pedidos organizados do cardapio ao checkout.
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <PreviewPill
+                icon={Truck}
+                label="Entrega media"
+                value={deliveryTime}
+              />
+              <PreviewPill
+                icon={CreditCard}
+                label="Ticket medio"
+                value={avgTicket}
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3">
+            {products.map((product) => (
+              <div
+                key={product.id}
+                className="flex items-center justify-between rounded-[18px] border border-[#E5E7EB] bg-white px-3 py-3"
+              >
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-semibold text-[#111827]">
+                    {product.name}
+                  </div>
+                  <div className="truncate text-xs text-[#6B7280]">
+                    {product.category}
+                  </div>
+                </div>
+                <div className="text-sm font-semibold text-[#111827]">
+                  {formatBRL(product.price)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <MiniPanel title="Categorias" subtitle={`${categoriesCount} ativas`} />
+            <MiniPanel title="Checkout" subtitle="Entrega e retirada" />
+            <MiniPanel title="Pagamento" subtitle="Fluxo objetivo" />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function PreviewPill({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-[18px] border border-white/10 bg-white/8 p-3.5">
+      <div className="flex items-center gap-2 text-white/70">
+        <Icon className="h-4 w-4" />
+        <span className="text-xs font-medium">{label}</span>
+      </div>
+      <div className="mt-2 text-sm font-semibold text-white">{value}</div>
+    </div>
+  );
+}
+
+function ProductCardPreview({
+  name,
+  description,
+  price,
+}: {
+  name: string;
+  description: string;
+  price: string;
+}) {
+  return (
+    <div className="rounded-[18px] border border-[#E5E7EB] bg-white p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="truncate text-sm font-semibold text-[#111827]">
+            {name}
+          </div>
+          <div className="mt-1 text-sm leading-6 text-[#6B7280]">{description}</div>
+        </div>
+        <div className="text-sm font-semibold text-[#111827]">{price}</div>
+      </div>
+    </div>
+  );
+}
+
+function MiniPanel({
+  title,
+  subtitle,
+}: {
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <div className="rounded-[18px] border border-[#E5E7EB] bg-white p-3.5">
+      <div className="text-sm font-semibold text-[#111827]">{title}</div>
+      <div className="mt-1 text-sm text-[#6B7280]">{subtitle}</div>
+    </div>
+  );
+}
+
+function ModulePill({
+  icon: Icon,
+  label,
+}: {
+  icon: LucideIcon;
+  label: string;
+}) {
+  return (
+    <div className="inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#6B7280] shadow-[0_8px_18px_rgba(0,0,0,0.03)]">
+      <Icon className="h-4 w-4 text-[#00C853]" />
+      <span>{label}</span>
+    </div>
+  );
+}
+
+function BenefitCard({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}) {
+  return (
+    <article className="rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-[0_16px_36px_rgba(17,24,39,0.05)]">
+      <div className="inline-flex rounded-2xl bg-[#E8FFF1] p-3 text-[#00C853]">
+        <Icon className="h-5 w-5" />
+      </div>
+      <h3 className="mt-5 text-lg font-semibold text-[#111827]">{title}</h3>
+      <p className="mt-2 text-sm leading-7 text-[#6B7280]">{description}</p>
+    </article>
+  );
+}
+
+function InlineCta({
+  title,
+  href,
+  label,
+  className = "",
+}: {
+  title: string;
+  href: string;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`rounded-[28px] border border-[#D8F5E2] bg-white p-6 shadow-[0_16px_36px_rgba(17,24,39,0.05)] ${className}`}
+    >
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="text-lg font-semibold text-[#111827]">{title}</div>
+        <PrimaryButton href={href}>{label}</PrimaryButton>
+      </div>
+    </div>
+  );
+}
+
+function FeatureShowcase({
+  reverse,
+  eyebrow,
+  title,
+  description,
+  bullets,
+  variant,
+  categoriesCount,
+  featuredCount,
+  avgTicket,
+  products,
+}: {
+  reverse: boolean;
+  eyebrow: string;
+  title: string;
+  description: string;
+  bullets: string[];
+  variant: MockVariant;
+  categoriesCount: number;
+  featuredCount: number;
+  avgTicket: string;
+  products: typeof menuProducts;
+}) {
+  return (
+    <div
+      className={`grid gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(380px,1.08fr)] lg:items-center ${
+        reverse ? "lg:[&>*:first-child]:order-2" : ""
+      }`}
+    >
+      <div className="max-w-xl">
+        <SectionEyebrow>{eyebrow}</SectionEyebrow>
+        <SectionTitle>{title}</SectionTitle>
+        <p className="mt-4 text-base leading-7 text-[#6B7280]">{description}</p>
+
+        <div className="mt-6 space-y-4">
+          {bullets.map((bullet) => (
+            <FeatureLine key={bullet} text={bullet} />
+          ))}
+        </div>
+      </div>
+
+      <ShowcaseMock
+        variant={variant}
+        categoriesCount={categoriesCount}
+        featuredCount={featuredCount}
+        avgTicket={avgTicket}
+        products={products}
+      />
+    </div>
+  );
+}
+
+function FeatureLine({ text }: { text: string }) {
+  return (
+    <div className="flex items-start gap-3 text-sm leading-7 text-[#111827]">
+      <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#00C853]" />
+      <span>{text}</span>
+    </div>
+  );
+}
+
+function ShowcaseMock({
+  variant,
+  categoriesCount,
+  featuredCount,
+  avgTicket,
+  products,
+}: {
+  variant: MockVariant;
+  categoriesCount: number;
+  featuredCount: number;
+  avgTicket: string;
+  products: typeof menuProducts;
+}) {
+  return (
+    <div className="rounded-[28px] border border-[#E5E7EB] bg-[#F5F7FA] p-4 shadow-[0_18px_48px_rgba(17,24,39,0.06)]">
+      <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-4">
+        {variant === "dashboard" ? (
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <MiniPanel title="Categorias" subtitle={`${categoriesCount}`} />
+              <MiniPanel title="Destaques" subtitle={`${featuredCount}`} />
+              <MiniPanel title="Ticket" subtitle={avgTicket} />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <DashboardStat title="Pedidos hoje" value="28" />
+              <DashboardStat title="Taxa de conversao" value="18%" />
+            </div>
+          </div>
+        ) : null}
+
+        {variant === "products" ? (
+          <div className="space-y-3">
+            {products.map((product) => (
+              <ProductCardPreview
+                key={product.id}
+                name={product.name}
+                description={product.description}
+                price={formatBRL(product.price)}
+              />
+            ))}
+          </div>
+        ) : null}
+
+        {variant === "orders" ? (
+          <div className="space-y-3">
+            <OrderRow title="Pedido #1042" status="Novo" total="R$ 69,90" />
+            <OrderRow title="Pedido #1041" status="Em preparo" total="R$ 42,00" />
+            <OrderRow title="Pedido #1040" status="Concluido" total="R$ 89,90" />
+          </div>
+        ) : null}
+
+        {variant === "reports" ? (
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <MiniPanel title="Faturamento" subtitle="R$ 4.280" />
+              <MiniPanel title="Ticket medio" subtitle={avgTicket} />
+              <MiniPanel title="Top item" subtitle="Combo destaque" />
+            </div>
+            <div className="rounded-[18px] bg-[#F5F7FA] p-4">
+              <div className="flex items-end gap-2">
+                <Bar height="38%" />
+                <Bar height="52%" />
+                <Bar height="46%" />
+                <Bar height="74%" />
+                <Bar height="68%" />
+                <Bar height="86%" />
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function DashboardStat({
+  title,
+  value,
+}: {
+  title: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-[18px] border border-[#E5E7EB] bg-[#F5F7FA] p-4">
+      <div className="text-sm text-[#6B7280]">{title}</div>
+      <div className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#111827]">
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function OrderRow({
+  title,
+  status,
+  total,
+}: {
+  title: string;
+  status: string;
+  total: string;
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-3">
+      <div>
+        <div className="text-sm font-semibold text-[#111827]">{title}</div>
+        <div className="text-xs text-[#6B7280]">{status}</div>
+      </div>
+      <div className="text-sm font-semibold text-[#111827]">{total}</div>
+    </div>
+  );
+}
+
+function Bar({ height }: { height: string }) {
+  return (
+    <div className="flex-1 rounded-t-[10px] bg-[#00C853]" style={{ height }} />
+  );
+}
+
+function DemoCard({
+  title,
+  subtitle,
+  variant,
+  categoriesCount,
+  featuredCount,
+  avgTicket,
+  products,
+}: {
+  title: string;
+  subtitle: string;
+  variant: MockVariant;
+  categoriesCount: number;
+  featuredCount: number;
+  avgTicket: string;
+  products: typeof menuProducts;
+}) {
+  return (
+    <article className="rounded-[28px] border border-[#E5E7EB] bg-white p-5 shadow-[0_18px_42px_rgba(17,24,39,0.05)]">
+      <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[#00A844]">
+        {title}
+      </div>
+      <div className="mt-2 text-lg font-semibold text-[#111827]">{subtitle}</div>
+      <div className="mt-5">
+        <ShowcaseMock
+          variant={variant}
+          categoriesCount={categoriesCount}
+          featuredCount={featuredCount}
+          avgTicket={avgTicket}
+          products={products.slice(0, 2)}
+        />
+      </div>
+    </article>
+  );
+}
+
+function TestimonialCard({
+  quote,
+  author,
+  role,
+}: {
+  quote: string;
+  author: string;
+  role: string;
+}) {
+  return (
+    <article className="rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-[0_16px_36px_rgba(17,24,39,0.05)]">
+      <div className="flex items-center gap-1 text-[#00C853]">
+        <Star className="h-4 w-4 fill-current" />
+        <Star className="h-4 w-4 fill-current" />
+        <Star className="h-4 w-4 fill-current" />
+        <Star className="h-4 w-4 fill-current" />
+        <Star className="h-4 w-4 fill-current" />
+      </div>
+      <p className="mt-4 text-base leading-7 text-[#111827]">&quot;{quote}&quot;</p>
+      <div className="mt-5 text-sm font-semibold text-[#111827]">{author}</div>
+      <div className="text-sm text-[#6B7280]">{role}</div>
+    </article>
+  );
+}
+
+function FaqItem({
+  question,
+  answer,
+}: {
+  question: string;
+  answer: string;
+}) {
+  return (
+    <details className="group rounded-[22px] border border-[#E5E7EB] bg-white p-5 shadow-[0_12px_24px_rgba(17,24,39,0.04)]">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left text-base font-semibold text-[#111827]">
+        {question}
+        <span className="text-[#00A844] transition group-open:rotate-45">+</span>
+      </summary>
+      <p className="mt-4 max-w-3xl text-sm leading-7 text-[#6B7280]">{answer}</p>
+    </details>
   );
 }

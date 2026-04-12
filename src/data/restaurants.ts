@@ -19,14 +19,14 @@ const restaurants: Record<string, RestaurantProfile> = {
     slug: "geladao-dos-fernandes",
     name: "Geladão dos Fernandes",
     description:
-      "Distribuidora com foco em cerveja gelada, combos prontos e pedido rápido pelo celular.",
-    highlight: "Operação piloto pronta para validar pedidos online",
-    logo: defaultRestaurantLogo,
+      "Seja para abastecer o fim de semana, um churrasco ou uma comemoração especial, estamos prontos para atender com eficiência, oferecendo bebidas de qualidade, preços justos e entrega garantida.",
+    highlight: "Bebidas geladas para entrega e retirada no balcão",
+    logo: "https://s3-sa-east-1.amazonaws.com/assets.meucomercio.com.br/production/logos/4c77a37f2b524343c52c4c328a64ce39.png",
     bannerImage: defaultBannerImage,
     timeZone: defaultTimeZone,
     openingHours: defaultOpeningHours,
-    deliveryFee: 5,
-    deliveryTime: "20-35 min",
+    deliveryFee: 0,
+    deliveryTime: "Taxa de entrega a combinar",
     rating: 4.8,
     reviewCount: 312,
     whatsappNumber: defaultWhatsappNumber,
@@ -76,6 +76,11 @@ export function getRestaurantBySlug(slug: string): RestaurantProfile {
     reviewCount: 0,
     whatsappNumber: defaultWhatsappNumber,
   });
+}
+
+export function hasRestaurantSlug(slug: string) {
+  const normalizedSlug = slug.trim().toLowerCase();
+  return Object.prototype.hasOwnProperty.call(restaurants, normalizedSlug);
 }
 
 function formatRestaurantName(slug: string) {

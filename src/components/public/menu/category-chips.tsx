@@ -18,9 +18,9 @@ export function CategoryChips({
           <button
             key={category}
             onClick={() => onSelectCategory(category)}
-            className={`shrink-0 rounded-full border px-3.5 py-2 text-sm font-semibold transition ${active
-              ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white"
-              : "border-zinc-200 bg-zinc-100 text-zinc-500"
+            className={`shrink-0 rounded-full border px-4 py-2.5 text-sm font-semibold shadow-sm transition ${active
+              ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white shadow-[0_12px_22px_rgba(0,115,230,0.18)]"
+              : "border-[var(--brand-border)] bg-white text-zinc-500 hover:border-[var(--brand-primary)]/25 hover:text-[var(--brand-primary)]"
               }`}
           >
             {category}

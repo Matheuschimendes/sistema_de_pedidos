@@ -17,8 +17,8 @@ export function PaymentOptions({
   onChange,
 }: PaymentOptionsProps) {
   return (
-    <div className="rounded-2xl border border-zinc-100 bg-white p-5">
-      <div className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-400">
+    <div className="ds-panel p-5">
+      <div className="font-ui-mono text-[11px] uppercase tracking-[0.02em] text-[var(--brand-primary)]">
         Forma de pagamento
       </div>
       <div className="mb-4 mt-2 text-sm leading-6 text-zinc-500">
@@ -30,13 +30,13 @@ export function PaymentOptions({
           <button
             key={option.key}
             onClick={() => onChange(option.key)}
-            className={`flex items-center gap-3 rounded-xl border p-3.5 ${value === option.key
-                ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)]"
-                : "border-zinc-200 bg-white"
+            className={`flex items-center gap-3 rounded-[18px] border p-3.5 shadow-sm transition ${value === option.key
+                ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] shadow-[0_12px_22px_rgba(0,115,230,0.12)]"
+                : "border-[var(--brand-border)] bg-white"
               }`}
           >
             <span className="text-lg">{option.icon}</span>
-            <span className="text-base font-medium text-zinc-700">
+            <span className="text-base font-medium text-[var(--brand-ink)]">
               {option.label}
             </span>
           </button>

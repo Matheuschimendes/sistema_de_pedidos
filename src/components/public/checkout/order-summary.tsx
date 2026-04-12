@@ -8,8 +8,8 @@ type OrderSummaryProps = {
 
 export function OrderSummary({ items, subtotal }: OrderSummaryProps) {
   return (
-    <div className="rounded-2xl border border-zinc-100 bg-white p-5">
-      <div className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-400">
+    <div className="ds-panel p-5">
+      <div className="font-ui-mono text-[11px] uppercase tracking-[0.02em] text-[var(--brand-primary)]">
         Seu pedido
       </div>
       <div className="mb-4 mt-2 text-sm leading-6 text-zinc-500">
@@ -25,14 +25,14 @@ export function OrderSummary({ items, subtotal }: OrderSummaryProps) {
             <span className="leading-6">
               {item.quantity}× {item.name}
             </span>
-            <strong className="font-semibold text-zinc-900">
+            <strong className="font-semibold text-[var(--brand-ink)]">
               {formatBRL(item.quantity * item.price)}
             </strong>
           </div>
         ))}
       </div>
 
-      <div className="mt-4 flex justify-between border-t border-zinc-100 pt-4 text-base font-semibold text-zinc-900">
+      <div className="mt-4 flex justify-between border-t border-[var(--brand-border)]/75 pt-4 text-base font-semibold text-[var(--brand-ink)]">
         <span>Subtotal</span>
         <span>{formatBRL(subtotal)}</span>
       </div>

@@ -12,8 +12,8 @@ export function CustomerForm({
   onChange,
 }: CustomerFormProps) {
   return (
-    <div className="rounded-2xl border border-zinc-100 bg-white p-5">
-      <div className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-400">
+    <div className="ds-panel p-5">
+      <div className="font-ui-mono text-[11px] uppercase tracking-[0.02em] text-[var(--brand-primary)]">
         Seus dados
       </div>
       <div className="mb-4 mt-2 text-sm leading-6 text-zinc-500">
@@ -30,7 +30,7 @@ export function CustomerForm({
             value={data.name}
             onChange={(e) => onChange("name", e.target.value)}
             placeholder="Seu nome"
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary-soft)]"
+            className="ds-input px-3.5 py-3 text-base"
           />
         </div>
 
@@ -42,7 +42,7 @@ export function CustomerForm({
             value={data.phone}
             onChange={(e) => onChange("phone", e.target.value)}
             placeholder="(85) 99999-9999"
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary-soft)]"
+            className="ds-input px-3.5 py-3 text-base"
           />
         </div>
 
@@ -55,7 +55,7 @@ export function CustomerForm({
               value={data.address}
               onChange={(e) => onChange("address", e.target.value)}
               placeholder="Rua, número, complemento, bairro..."
-              className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary-soft)]"
+              className="ds-input px-3.5 py-3 text-base"
             />
           </div>
         )}
@@ -68,7 +68,7 @@ export function CustomerForm({
             value={data.notes}
             onChange={(e) => onChange("notes", e.target.value)}
             placeholder="Ex: sem cebola..."
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3.5 py-3 text-base outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-primary-soft)]"
+            className="ds-input px-3.5 py-3 text-base"
           />
         </div>
       </div>

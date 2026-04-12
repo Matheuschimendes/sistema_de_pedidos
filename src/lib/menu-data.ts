@@ -1,5 +1,7 @@
 import { comboCategory } from "@/src/lib/menu-groups";
 import { prisma } from "@/src/lib/prisma";
+import { menuProducts } from "@/src/data/menu-products";
+import { getRestaurantBySlug, hasRestaurantSlug } from "@/src/data/restaurants";
 import {
   AdminCategory,
   AdminCategorySummary,
@@ -138,6 +140,17 @@ export async function getPublicRestaurantMenuBySlug(
   });
 
   if (!restaurant) {
+    if (hasRestaurantSlug(slug)) {
+      const restaurantProfile = getRestaurantBySlug(slug);
+      const products = menuProducts.filter((product) => product.isAvailable);
+
+      return {
+        restaurant: restaurantProfile,
+        products,
+        categories: buildMenuCategoriesFromProducts(products),
+      };
+    }
+
     return null;
   }
 

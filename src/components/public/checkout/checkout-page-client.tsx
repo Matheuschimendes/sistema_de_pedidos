@@ -99,6 +99,7 @@ export function CheckoutPageClient({
   }, [checkoutItems]);
 
   const discount = 0;
+  const deliveryFeeToCombine = /combinar/i.test(restaurant.deliveryTime ?? "");
 
   const deliveryFee = useMemo(() => {
     return deliveryType === "delivery" ? restaurant.deliveryFee ?? 0 : 0;
@@ -172,8 +173,8 @@ export function CheckoutPageClient({
 
   if (!hydrated) {
     return (
-      <main className="mx-auto min-h-screen max-w-[480px] bg-zinc-50 p-4">
-        <div className="rounded-2xl bg-white p-5 text-base text-zinc-500 shadow-sm">
+      <main className="page-shell min-h-screen px-3 py-3 sm:px-4">
+        <div className="mx-auto max-w-[520px] rounded-[32px] border border-[var(--brand-border)]/80 bg-white p-5 text-base text-zinc-500 shadow-[var(--brand-shadow-lg)]">
           Carregando checkout...
         </div>
       </main>
@@ -182,52 +183,62 @@ export function CheckoutPageClient({
 
   if (successOrder) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-[480px] flex-col bg-zinc-50">
-        <OrderSuccess
-          slug={slug}
-          orderNumber={successOrder}
-          items={checkoutItems}
-          total={total}
-          deliveryType={deliveryType}
-        />
+      <main className="page-shell min-h-screen px-3 py-3 sm:px-4">
+        <div className="mx-auto flex min-h-[calc(100vh-1.5rem)] max-w-[520px] flex-col overflow-hidden rounded-[32px] border border-[var(--brand-border)]/80 bg-white shadow-[var(--brand-shadow-lg)]">
+          <OrderSuccess
+            slug={slug}
+            orderNumber={successOrder}
+            items={checkoutItems}
+            total={total}
+            deliveryType={deliveryType}
+          />
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-[480px] bg-zinc-50">
-      <CheckoutHeader
-        slug={slug}
-        restaurantName={restaurant.name}
-        restaurantLogo={restaurant.logo}
-      />
-
-      <div className="flex flex-col gap-4 px-4 pb-32 pt-4">
-        <OrderSummary items={checkoutItems} subtotal={subtotal} />
-
-        <DeliveryOptions value={deliveryType} onChange={setDeliveryType} />
-
-        <CustomerForm
-          data={customer}
-          deliveryType={deliveryType}
-          onChange={updateCustomer}
+    <main className="page-shell min-h-screen px-3 py-3 sm:px-4">
+      <div className="mx-auto min-h-[calc(100vh-1.5rem)] max-w-[520px] overflow-hidden rounded-[32px] border border-[var(--brand-border)]/80 bg-white shadow-[var(--brand-shadow-lg)]">
+        <CheckoutHeader
+          slug={slug}
+          restaurantName={restaurant.name}
+          restaurantLogo={restaurant.logo}
         />
 
-        <PaymentOptions value={paymentMethod} onChange={setPaymentMethod} />
-      </div>
+        <div className="flex flex-col gap-4 px-4 pb-36 pt-4">
+          <OrderSummary items={checkoutItems} subtotal={subtotal} />
 
-      <CheckoutFooter
-        subtotal={subtotal}
-        deliveryFee={deliveryFee}
-        discount={discount}
-        total={total}
-        showDeliveryFee={deliveryType === "delivery"}
-        disabled={isSubmitting || checkoutItems.length === 0}
-        errorMessage={submitError}
-        onConfirm={() => {
-          void handleConfirm();
-        }}
-      />
+          <DeliveryOptions
+            value={deliveryType}
+            deliveryFee={restaurant.deliveryFee ?? 0}
+            deliveryFeeToCombine={deliveryFeeToCombine}
+            onChange={setDeliveryType}
+          />
+
+          <CustomerForm
+            data={customer}
+            deliveryType={deliveryType}
+            onChange={updateCustomer}
+          />
+
+          <PaymentOptions value={paymentMethod} onChange={setPaymentMethod} />
+        </div>
+
+        <CheckoutFooter
+          subtotal={subtotal}
+          deliveryFee={deliveryFee}
+          deliveryFeeToCombine={deliveryType === "delivery" && deliveryFeeToCombine}
+          discount={discount}
+          total={total}
+          showDeliveryFee={deliveryType === "delivery"}
+          disabled={isSubmitting || checkoutItems.length === 0}
+          errorMessage={submitError}
+          onConfirm={() => {
+            void handleConfirm();
+          }}
+        />
+      </div>
     </main>
   );
 }
