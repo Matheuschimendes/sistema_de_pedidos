@@ -131,9 +131,6 @@ export function CheckoutPageClient({
 
     setIsSubmitting(true);
     setSubmitError(null);
-    const whatsappWindow = restaurant.whatsappNumber
-      ? window.open("", "_blank", "noopener,noreferrer")
-      : null;
 
     const result = await createOrderAction({
       slug,
@@ -147,20 +144,21 @@ export function CheckoutPageClient({
     });
 
     if (!result.ok) {
-      whatsappWindow?.close();
       setSubmitError(result.message);
       setIsSubmitting(false);
       return;
     }
 
     if (result.whatsappUrl) {
-      if (whatsappWindow) {
-        whatsappWindow.location.href = result.whatsappUrl;
-      } else {
-        window.open(result.whatsappUrl, "_blank", "noopener,noreferrer");
+      const whatsappWindow = window.open(
+        result.whatsappUrl,
+        "_blank",
+        "noopener,noreferrer",
+      );
+
+      if (!whatsappWindow) {
+        window.location.href = result.whatsappUrl;
       }
-    } else {
-      whatsappWindow?.close();
     }
 
     startTransition(() => {
