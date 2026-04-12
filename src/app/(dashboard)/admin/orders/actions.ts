@@ -77,15 +77,36 @@ function buildOrderNotificationResult(params: {
   order: NonNullable<Awaited<ReturnType<typeof getAdminOrderContext>>>;
   nextStatus: OrderStatus;
 }): OrderActionResult {
+  const restaurantWhatsappNumber = normalizePhoneNumber(
+    params.order.restaurant.whatsappNumber ?? "",
+  );
+
+  if (!restaurantWhatsappNumber) {
+    return {
+      ok: false,
+      message:
+        "Configure o WhatsApp da loja no Dashboard para enviar atualizacoes de status ao cliente.",
+    };
+  }
+
+  const customerPhone = normalizePhoneNumber(params.order.customerPhone);
+
+  if (!customerPhone) {
+    return {
+      ok: false,
+      message:
+        "Este pedido nao possui um WhatsApp valido do cliente para envio da atualizacao.",
+    };
+  }
+
   const notificationMessage = buildOrderStatusNotificationMessage({
     restaurantName: params.order.restaurant.name,
-    restaurantWhatsappNumber: params.order.restaurant.whatsappNumber ?? undefined,
+    restaurantWhatsappNumber,
     orderId: params.order.id,
     customerName: params.order.customerName,
     status: params.nextStatus,
     deliveryType: params.order.deliveryType,
   });
-  const customerPhone = normalizePhoneNumber(params.order.customerPhone);
 
   return {
     ok: true,
@@ -175,6 +196,33 @@ export async function advanceOrderStatusAction(
   );
 }
 
+export async function acceptPendingOrderAction(
+  orderId: string,
+): Promise<OrderActionResult> {
+  const order = await getAdminOrderContext(orderId);
+
+  if (!order) {
+    return {
+      ok: false,
+      message: "Nao foi possivel localizar o pedido solicitado.",
+    };
+  }
+
+  if (order.status !== "pending") {
+    return {
+      ok: false,
+      message:
+        "Somente pedidos aguardando confirmacao podem ser aceitos por esta acao.",
+    };
+  }
+
+  return commitOrderStatusChange(
+    orderId,
+    "confirmed",
+    "Pedido aceito e mensagem preparada para o cliente.",
+  );
+}
+
 export async function cancelOrderAction(
   orderId: string,
 ): Promise<OrderActionResult> {
@@ -201,10 +249,42 @@ export async function cancelOrderAction(
     };
   }
 
+  const cancellationMessage =
+    order.status === "pending"
+      ? "Pedido nao aceito e aviso preparado para o cliente."
+      : "Pedido cancelado e aviso preparado para o cliente.";
+
   return commitOrderStatusChange(
     orderId,
     "canceled",
-    "Pedido cancelado e aviso preparado para o cliente.",
+    cancellationMessage,
+  );
+}
+
+export async function rejectPendingOrderAction(
+  orderId: string,
+): Promise<OrderActionResult> {
+  const order = await getAdminOrderContext(orderId);
+
+  if (!order) {
+    return {
+      ok: false,
+      message: "Nao foi possivel localizar o pedido solicitado.",
+    };
+  }
+
+  if (order.status !== "pending") {
+    return {
+      ok: false,
+      message:
+        "Somente pedidos aguardando confirmacao podem ser recusados por esta acao.",
+    };
+  }
+
+  return commitOrderStatusChange(
+    orderId,
+    "canceled",
+    "Pedido nao aceito e aviso preparado para o cliente.",
   );
 }
 

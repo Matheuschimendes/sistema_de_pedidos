@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Clock3, EyeOff, Filter, Plus, Search } from "lucide-react";
 import { AdminShell } from "@/src/components/admin/admin-shell";
+import { OrderDecisionControls } from "@/src/components/admin/order-decision-controls";
 import {
   getAdminRestaurantId,
   requireAdminSession,
@@ -13,10 +14,11 @@ import {
   getOrderStatusMeta,
   getPaymentMethodLabel,
 } from "@/src/lib/orders";
-import { Order, OrderItem } from "@/src/types/order";
+import { Order, OrderItem, OrderStatus } from "@/src/types/order";
 
 type OrdersRange = "today" | "7d" | "30d" | "all";
 type OrdersView = "history" | "open" | "pending" | "quotes";
+type OrdersStage = "all" | OrderStatus;
 
 type PageProps = {
   searchParams: Promise<{
@@ -24,6 +26,7 @@ type PageProps = {
     range?: string;
     totals?: string;
     view?: string;
+    stage?: string;
     status?: string;
   }>;
 };
@@ -38,7 +41,7 @@ const RANGE_OPTIONS: Array<{ value: OrdersRange; label: string }> = [
 export default async function AdminOrdersPage({ searchParams }: PageProps) {
   const session = await requireAdminSession();
   const restaurantId = await getAdminRestaurantId(session);
-  const [{ q, range, totals, view, status }, restaurant, orders] = await Promise.all([
+  const [{ q, range, totals, view, stage, status }, restaurant, orders] = await Promise.all([
     searchParams,
     getRestaurantForAdmin(restaurantId),
     getAdminOrders(restaurantId, { includeCanceled: true }),
@@ -50,13 +53,21 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
 
   const selectedRange = parseOrdersRange(range);
   const selectedView = parseOrdersView(view);
+  const selectedStage = parseOrdersStage(stage, selectedView);
+  const stageOptions = getStageOptionsForView(selectedView);
   const searchQuery = q?.trim() ?? "";
   const shouldHideTotals = totals === "hidden";
   const statusMessage = getStatusMessage(status);
 
   const ordersByView = filterOrdersByView(orders, selectedView);
   const ordersInRange = filterOrdersByRange(ordersByView, selectedRange, new Date());
-  const filteredOrders = filterOrdersBySearch(ordersInRange, searchQuery);
+  const ordersByStage = filterOrdersByStage(ordersInRange, selectedStage);
+  const searchedOrders = filterOrdersBySearch(ordersByStage, searchQuery);
+  const filteredOrders = sortOrdersForDisplay(
+    searchedOrders,
+    selectedView,
+    selectedStage,
+  );
 
   return (
     <AdminShell
@@ -81,6 +92,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                 <Link
                   href={buildOrdersHref({
                     view: "open",
+                    stage: normalizeStageForView(selectedStage, "open"),
                     range: selectedRange,
                     totals: shouldHideTotals ? "hidden" : undefined,
                     q: searchQuery,
@@ -93,6 +105,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                 <Link
                   href={buildOrdersHref({
                     view: "open",
+                    stage: normalizeStageForView(selectedStage, "open"),
                     range: selectedRange,
                     totals: shouldHideTotals ? "hidden" : undefined,
                   })}
@@ -115,6 +128,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                 {renderViewTab({
                   currentView: selectedView,
                   targetView: "open",
+                  stage: selectedStage,
                   label: "Pedido em aberto",
                   range: selectedRange,
                   totals: shouldHideTotals ? "hidden" : undefined,
@@ -123,6 +137,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                 {renderViewTab({
                   currentView: selectedView,
                   targetView: "pending",
+                  stage: selectedStage,
                   label: "Pedido a aceitar",
                   range: selectedRange,
                   totals: shouldHideTotals ? "hidden" : undefined,
@@ -131,6 +146,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                 {renderViewTab({
                   currentView: selectedView,
                   targetView: "quotes",
+                  stage: selectedStage,
                   label: "Orcamentos",
                   range: selectedRange,
                   totals: shouldHideTotals ? "hidden" : undefined,
@@ -139,6 +155,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                 {renderViewTab({
                   currentView: selectedView,
                   targetView: "history",
+                  stage: selectedStage,
                   label: "Historico",
                   range: selectedRange,
                   totals: shouldHideTotals ? "hidden" : undefined,
@@ -162,35 +179,40 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                 />
                 <input type="hidden" name="view" value={selectedView} />
                 <input type="hidden" name="range" value={selectedRange} />
+                <input type="hidden" name="stage" value={selectedStage} />
                 {shouldHideTotals ? <input type="hidden" name="totals" value="hidden" /> : null}
               </form>
 
-              <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-700">
-                <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-3 py-1.5">
-                  <Filter className="h-4 w-4 text-zinc-500" />
-                  Filtros
+              <div className="flex flex-col gap-2 text-sm text-zinc-700">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-3 py-1.5">
+                    <Filter className="h-4 w-4 text-zinc-500" />
+                    Filtros
+                  </div>
+                  <span className="text-zinc-300">|</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {RANGE_OPTIONS.map((option) => (
+                      <Link
+                        key={option.value}
+                        href={buildOrdersHref({
+                          q: searchQuery,
+                          view: selectedView,
+                          stage: selectedStage,
+                          range: option.value,
+                          totals: shouldHideTotals ? "hidden" : undefined,
+                        })}
+                        className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                          selectedRange === option.value
+                            ? "border-zinc-900 bg-zinc-900 text-white"
+                            : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
+                        }`}
+                      >
+                        {option.label}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-                <span className="text-zinc-300">|</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {RANGE_OPTIONS.map((option) => (
-                    <Link
-                      key={option.value}
-                      href={buildOrdersHref({
-                        q: searchQuery,
-                        view: selectedView,
-                        range: option.value,
-                        totals: shouldHideTotals ? "hidden" : undefined,
-                      })}
-                      className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                        selectedRange === option.value
-                          ? "border-zinc-900 bg-zinc-900 text-white"
-                          : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
-                      }`}
-                    >
-                      {option.label}
-                    </Link>
-                  ))}
-                </div>
+
               </div>
             </div>
           </div>
@@ -203,6 +225,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
               href={buildOrdersHref({
                 q: searchQuery,
                 view: selectedView,
+                stage: selectedStage,
                 range: selectedRange,
                 totals: shouldHideTotals ? undefined : "hidden",
               })}
@@ -211,6 +234,33 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
               <EyeOff className="h-4 w-4" />
               {shouldHideTotals ? "Mostrar total" : "Ocultar total"}
             </Link>
+          </div>
+
+          <div className="border-b border-zinc-200 bg-zinc-50/70 px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+              {getStageMenuTitle(selectedView)}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {stageOptions.map((option) => (
+                <Link
+                  key={option.value}
+                  href={buildOrdersHref({
+                    q: searchQuery,
+                    view: selectedView,
+                    stage: option.value,
+                    range: selectedRange,
+                    totals: shouldHideTotals ? "hidden" : undefined,
+                  })}
+                  className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                    selectedStage === option.value
+                      ? "border-sky-600 bg-sky-600 text-white shadow-[0_8px_18px_rgba(2,132,199,0.18)]"
+                      : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
+                  }`}
+                >
+                  {option.label}
+                </Link>
+              ))}
+            </div>
           </div>
 
           {filteredOrders.length === 0 ? (
@@ -253,9 +303,16 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                     return (
                       <tr key={order.id} className="align-top">
                         <td className="px-3 py-3">
-                          <span className="inline-flex rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-semibold text-zinc-700">
-                            {orderStatus.label}
-                          </span>
+                          <div className="min-w-[260px] space-y-2">
+                            <span className="inline-flex rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-semibold text-zinc-700">
+                              {orderStatus.label}
+                            </span>
+                            <OrderDecisionControls
+                              orderId={order.id}
+                              status={order.status}
+                              deliveryType={order.deliveryType}
+                            />
+                          </div>
                         </td>
                         <td className="whitespace-nowrap px-3 py-3 font-semibold text-zinc-900">
                           {order.orderNumber}
@@ -303,6 +360,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
 function renderViewTab(params: {
   currentView: OrdersView;
   targetView: OrdersView;
+  stage: OrdersStage;
   label: string;
   range: OrdersRange;
   totals?: "hidden";
@@ -318,10 +376,16 @@ function renderViewTab(params: {
     );
   }
 
+  const stageForTargetView = normalizeStageForView(
+    params.stage,
+    params.targetView,
+  );
+
   return (
     <Link
       href={buildOrdersHref({
         view: params.targetView,
+        stage: stageForTargetView,
         range: params.range,
         totals: params.totals,
         q: params.q,
@@ -346,7 +410,77 @@ function parseOrdersView(value: string | undefined): OrdersView {
     return value;
   }
 
-  return "history";
+  return "open";
+}
+
+function parseOrdersStage(
+  value: string | undefined,
+  view: OrdersView,
+): OrdersStage {
+  const allowedStages = getStageOptionsForView(view).map((option) => option.value);
+
+  if (value && allowedStages.includes(value as OrdersStage)) {
+    return value as OrdersStage;
+  }
+
+  return getDefaultStageForView(view);
+}
+
+function getDefaultStageForView(view: OrdersView): OrdersStage {
+  return view === "pending" ? "pending" : "all";
+}
+
+function normalizeStageForView(stage: OrdersStage, view: OrdersView): OrdersStage {
+  const allowedStages = getStageOptionsForView(view).map((option) => option.value);
+
+  if (allowedStages.includes(stage)) {
+    return stage;
+  }
+
+  return getDefaultStageForView(view);
+}
+
+function getStageOptionsForView(view: OrdersView): Array<{
+  value: OrdersStage;
+  label: string;
+}> {
+  if (view === "open") {
+    return [
+      { value: "all", label: "Todos" },
+      { value: "pending", label: "Pendente" },
+      { value: "confirmed", label: "Confirmado" },
+      { value: "preparing", label: "Em preparo" },
+      { value: "ready", label: "Pronto / rota" },
+    ];
+  }
+
+  if (view === "history") {
+    return [
+      { value: "all", label: "Todos" },
+      { value: "completed", label: "Concluido" },
+      { value: "canceled", label: "Cancelado" },
+    ];
+  }
+
+  if (view === "pending") {
+    return [{ value: "pending", label: "Pendente" }];
+  }
+
+  return [{ value: "all", label: "Todos" }];
+}
+
+function getStageMenuTitle(view: OrdersView) {
+  switch (view) {
+    case "open":
+      return "Menu de etapas - pedidos em aberto";
+    case "pending":
+      return "Menu de etapas - pedidos para decidir";
+    case "history":
+      return "Menu de etapas - historico";
+    case "quotes":
+    default:
+      return "Menu de etapas";
+  }
 }
 
 function filterOrdersByView(orders: Order[], view: OrdersView) {
@@ -364,6 +498,54 @@ function filterOrdersByView(orders: Order[], view: OrdersView) {
     case "quotes":
       return [];
   }
+}
+
+function filterOrdersByStage(orders: Order[], stage: OrdersStage) {
+  if (stage === "all") {
+    return orders;
+  }
+
+  return orders.filter((order) => order.status === stage);
+}
+
+function sortOrdersForDisplay(
+  orders: Order[],
+  view: OrdersView,
+  stage: OrdersStage,
+) {
+  if (stage !== "all") {
+    return orders;
+  }
+
+  const openOrderRank: Record<OrderStatus, number> = {
+    pending: 0,
+    confirmed: 1,
+    preparing: 2,
+    ready: 3,
+    completed: 4,
+    canceled: 5,
+  };
+
+  const historyOrderRank: Record<OrderStatus, number> = {
+    completed: 0,
+    canceled: 1,
+    pending: 2,
+    confirmed: 3,
+    preparing: 4,
+    ready: 5,
+  };
+
+  const rankMap = view === "history" ? historyOrderRank : openOrderRank;
+
+  return [...orders].sort((left, right) => {
+    const rankDifference = rankMap[left.status] - rankMap[right.status];
+
+    if (rankDifference !== 0) {
+      return rankDifference;
+    }
+
+    return right.createdAt.getTime() - left.createdAt.getTime();
+  });
 }
 
 function filterOrdersByRange(orders: Order[], range: OrdersRange, now: Date) {
@@ -433,6 +615,7 @@ function formatOrderTime(value: Date) {
 
 function buildOrdersHref(params: {
   view?: OrdersView;
+  stage?: OrdersStage;
   range?: OrdersRange;
   totals?: "hidden";
   q?: string;
@@ -441,6 +624,9 @@ function buildOrdersHref(params: {
 
   if (params.view) {
     query.set("view", params.view);
+  }
+  if (params.stage) {
+    query.set("stage", params.stage);
   }
   if (params.range) {
     query.set("range", params.range);

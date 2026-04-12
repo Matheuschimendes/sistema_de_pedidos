@@ -850,6 +850,7 @@ function OrderRealtimeCard({
           <OrderStatusControls
             orderId={order.id}
             status={order.status}
+            deliveryType={order.deliveryType}
             canAdvance={canAdvance}
             canCancel={canCancel}
             nextStatusLabel={nextStatusMeta?.label}
