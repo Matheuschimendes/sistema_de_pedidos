@@ -34,8 +34,8 @@ export default async function NewProductPage() {
 
   return (
     <AdminShell
-      title="Novo produto"
-      description="Cadastre um item e deixe o cardapio pronto para publicar em poucos passos."
+      title="Produtos"
+      description="Cadastro de itens do catalogo."
       restaurantName={restaurant.name}
       restaurantSlug={restaurant.slug}
       userName={session.name}
@@ -45,62 +45,18 @@ export default async function NewProductPage() {
           href="/admin/products"
           className="inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
         >
-          Voltar para produtos
+          Voltar
         </Link>
       }
     >
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0">
-          <ProductForm
-            title="Cadastrar produto"
-            description="Preencha os dados principais do item. Assim que salvar, ele ja podera entrar na operacao do menu."
-            categories={categories}
-            action={createProductAction}
-            submitLabel="Salvar produto"
-          />
-        </div>
-
-        <aside className="space-y-6">
-          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
-              Base atual
-            </p>
-
-            <div className="mt-4 space-y-3 text-sm leading-7 text-zinc-500">
-              <div>
-                Itens no menu:{" "}
-                <span className="font-semibold text-zinc-900">
-                  {products.length}
-                </span>
-              </div>
-              <div>
-                Categorias usadas:{" "}
-                <span className="font-semibold text-zinc-900">
-                  {categories.length}
-                </span>
-              </div>
-              <div>
-                Publicacao:{" "}
-                <span className="font-semibold text-zinc-900">
-                  assim que salvar
-                </span>
-              </div>
-            </div>
-          </section>
-
-          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
-              Antes de salvar
-            </p>
-
-            <div className="mt-4 space-y-3 text-sm leading-7 text-zinc-500">
-              <p>Use um nome direto e facil de reconhecer no menu.</p>
-              <p>Escolha a categoria certa para manter a navegacao organizada.</p>
-              <p>Ative o item so quando ele estiver pronto para aparecer na vitrine.</p>
-            </div>
-          </section>
-        </aside>
-      </div>
+      <ProductForm
+        title="Cadastro de produto"
+        description="Preencha os campos para cadastrar um novo item no catalogo."
+        categories={categories}
+        action={createProductAction}
+        submitLabel="Salvar"
+        cancelHref="/admin/products"
+      />
     </AdminShell>
   );
 }

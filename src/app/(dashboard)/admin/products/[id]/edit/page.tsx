@@ -11,7 +11,6 @@ import {
   getAdminRestaurantId,
   requireAdminSession,
 } from "@/src/lib/admin-auth";
-import { formatBRL } from "@/src/lib/format";
 import {
   getAdminCategories,
   getAdminProductById,
@@ -54,8 +53,8 @@ export default async function EditProductPage({ params }: PageProps) {
 
   return (
     <AdminShell
-      title={`Editar ${product.name}`}
-      description="Atualize os dados do produto e mantenha a vitrine sincronizada com a operacao."
+      title="Produtos"
+      description="Edicao de item do catalogo."
       restaurantName={restaurant.name}
       restaurantSlug={restaurant.slug}
       userName={session.name}
@@ -66,7 +65,7 @@ export default async function EditProductPage({ params }: PageProps) {
             href="/admin/products"
             className="inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
           >
-            Voltar para produtos
+            Voltar
           </Link>
           <form action={deleteProductAction.bind(null, product.id)}>
             <button
@@ -80,65 +79,15 @@ export default async function EditProductPage({ params }: PageProps) {
         </div>
       }
     >
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0">
-          <ProductForm
-            title="Editar dados do produto"
-            description="As alteracoes ficam disponiveis no cardapio assim que o formulario for salvo."
-            categories={categories}
-            action={updateProductAction.bind(null, product.id)}
-            product={product}
-            submitLabel="Salvar alteracoes"
-          />
-        </div>
-
-        <aside className="space-y-6">
-          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
-              Resumo do item
-            </p>
-
-            <div className="mt-4 space-y-3 text-sm leading-7 text-zinc-500">
-              <InfoRow label="Categoria" value={product.category} />
-              <InfoRow label="Preco" value={formatBRL(product.price)} />
-              <InfoRow
-                label="Status"
-                value={product.isAvailable ? "Ativo" : "Oculto"}
-              />
-              <InfoRow
-                label="Destaque"
-                value={product.featured ? "Ligado" : "Desligado"}
-              />
-            </div>
-          </section>
-
-          <section className="rounded-[30px] border border-zinc-200 bg-white p-5 shadow-[0_12px_36px_rgba(15,23,42,0.05)]">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
-              Edicao segura
-            </p>
-
-            <div className="mt-4 space-y-3 text-sm leading-7 text-zinc-500">
-              <p>Revise categoria, preco e imagem antes de salvar.</p>
-              <p>Se ocultar o item, ele sai da vitrine publica.</p>
-              <p>Use destaque apenas nos produtos que merecem mais visibilidade.</p>
-            </div>
-          </section>
-        </aside>
-      </div>
+      <ProductForm
+        title={`Cadastro de produto: ${product.name}`}
+        description="Atualize os campos do item e salve para refletir no catalogo."
+        categories={categories}
+        action={updateProductAction.bind(null, product.id)}
+        product={product}
+        submitLabel="Salvar"
+        cancelHref="/admin/products"
+      />
     </AdminShell>
-  );
-}
-
-function InfoRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div>
-      {label}: <span className="font-semibold text-zinc-900">{value}</span>
-    </div>
   );
 }
