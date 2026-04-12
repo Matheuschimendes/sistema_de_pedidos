@@ -3,5 +3,9 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="min-h-screen bg-zinc-100 text-zinc-900">{children}</div>;
+  return (
+    <div className="page-shell min-h-screen text-[var(--brand-text)]">
+      {children}
+    </div>
+  );
 }

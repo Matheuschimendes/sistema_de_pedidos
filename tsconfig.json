@@ -38,6 +38,8 @@
     "src/app/(public)/cardapio/page.tsx_old"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "**/* [0-9].ts",
+    "**/* [0-9].tsx"
   ]
 }

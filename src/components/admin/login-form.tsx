@@ -28,7 +28,7 @@ export function LoginForm() {
           autoCapitalize="none"
           spellCheck={false}
           placeholder="voce@restaurante.com"
-          className="w-full rounded-[16px] border border-zinc-200 bg-[#fffdfa] px-4 py-3.5 text-[15px] text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-[#5888b8] focus:ring-4 focus:ring-[#d9ecf8]/70"
+          className="ds-input px-4 py-3.5 text-[15px] text-zinc-950 placeholder:text-zinc-400"
           required
         />
 
@@ -52,14 +52,14 @@ export function LoginForm() {
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             placeholder="Digite sua senha"
-            className="w-full rounded-[16px] border border-zinc-200 bg-[#fffdfa] px-4 py-3.5 pr-12 text-[15px] text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-[#5888b8] focus:ring-4 focus:ring-[#d9ecf8]/70"
+            className="ds-input px-4 py-3.5 pr-12 text-[15px] text-zinc-950 placeholder:text-zinc-400"
             required
           />
 
           <button
             type="button"
             onClick={() => setShowPassword((value) => !value)}
-            className="absolute inset-y-0 right-3 inline-flex items-center justify-center rounded-full px-2 text-zinc-500 transition hover:text-[#5888b8]"
+            className="absolute inset-y-0 right-3 inline-flex items-center justify-center rounded-full px-2 text-zinc-500 transition hover:text-[var(--brand-primary)]"
             aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
           >
             {showPassword ? (
@@ -86,12 +86,12 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex w-full items-center justify-center rounded-[16px] bg-[#080828] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(8,8,40,0.18)] transition hover:bg-[#11143a] disabled:cursor-not-allowed disabled:opacity-70"
+        className="inline-flex w-full items-center justify-center rounded-[16px] bg-[var(--brand-primary)] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,115,230,0.18)] transition hover:bg-[var(--brand-primary-strong)] disabled:cursor-not-allowed disabled:opacity-70"
       >
         {pending ? "Entrando..." : "Entrar"}
       </button>
 
-      <div className="rounded-[18px] border border-zinc-200/90 bg-[#fcfaf6] px-4 py-4 text-sm leading-7 text-zinc-600">
+      <div className="rounded-[18px] border border-[var(--brand-border)]/90 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] px-4 py-4 text-sm leading-7 text-zinc-600">
         Se precisar recuperar o acesso, fale com quem administra a operacao do
         restaurante.
       </div>
