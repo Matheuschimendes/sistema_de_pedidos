@@ -177,11 +177,11 @@ export default async function HomePage() {
   const totalReviews = primaryRestaurant?.reviewCount ?? 0;
 
   return (
-    <main className="min-h-screen bg-white text-[#111827]">
-      <header className="sticky top-0 z-40 border-b border-black/5 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-5 py-4 md:px-6">
+    <main className="min-h-screen bg-[#e9f1f7] text-[var(--brand-ink)]">
+      <header className="sticky top-0 z-40 border-b border-[#c7d8e7] bg-[#eef5fb]/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-[1220px] items-center justify-between gap-4 px-5 py-4 md:px-6">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E8FFF1] text-[#00C853] shadow-[0_12px_24px_rgba(0,200,83,0.14)]">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EAF5FF] text-[#1688E8] shadow-[0_12px_24px_rgba(22,136,232,0.2)]">
               <Store className="h-5 w-5" />
             </div>
             <div>
@@ -220,11 +220,11 @@ export default async function HomePage() {
         </div>
       </header>
 
-      <section className="overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(0,200,83,0.14),transparent_32%),linear-gradient(180deg,#FFFFFF_0%,#F5F7FA_100%)]">
-        <div className="mx-auto grid max-w-[1200px] gap-12 px-5 pb-20 pt-12 md:px-6 md:pb-24 md:pt-16 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.95fr)] lg:items-center">
+      <section className="overflow-hidden border-b border-[#c7d8e7] bg-[linear-gradient(180deg,#f9fcff_0%,#edf4fa_100%)]">
+        <div className="mx-auto grid max-w-[1220px] gap-12 px-5 pb-18 pt-12 md:px-6 md:pb-22 md:pt-16 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.95fr)] lg:items-center">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#D8F5E2] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#00A844] shadow-[0_10px_22px_rgba(0,0,0,0.04)]">
-              <span className="h-2 w-2 rounded-full bg-[#00C853]" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#D1E6F8] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0F7AD8] shadow-[0_10px_22px_rgba(0,0,0,0.04)]">
+              <span className="h-2 w-2 rounded-full bg-[#1688E8]" />
               Teste 14 dias gratis
             </div>
 
@@ -266,8 +266,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-black/5 bg-white">
-        <div className="mx-auto max-w-[1200px] px-5 py-5 md:px-6">
+      <section className="border-b border-[#c7d8e7] bg-[#f7fbff]">
+        <div className="mx-auto max-w-[1220px] px-5 py-5 md:px-6">
           <div className="flex flex-wrap gap-3">
             {moduleItems.map((item) => (
               <ModulePill key={item.label} icon={item.icon} label={item.label} />
@@ -276,8 +276,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="beneficios" className="bg-[#F5F7FA]">
-        <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-6 md:py-24">
+      <section id="beneficios" className="border-b border-[#c7d8e7] bg-[#eff5fb]">
+        <div className="mx-auto max-w-[1220px] px-5 py-20 md:px-6 md:py-24">
           <div className="max-w-2xl">
             <SectionEyebrow>Beneficios principais</SectionEyebrow>
             <SectionTitle>
@@ -304,8 +304,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="funcionalidades" className="bg-white">
-        <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-6 md:py-24">
+      <section id="funcionalidades" className="border-b border-[#c7d8e7] bg-[#f8fcff]">
+        <div className="mx-auto max-w-[1220px] px-5 py-20 md:px-6 md:py-24">
           <div className="max-w-2xl">
             <SectionEyebrow>Funcionalidades</SectionEyebrow>
             <SectionTitle>
@@ -333,8 +333,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="demo" className="bg-[#F5F7FA]">
-        <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-6 md:py-24">
+      <section id="demo" className="border-b border-[#c7d8e7] bg-[#eff5fb]">
+        <div className="mx-auto max-w-[1220px] px-5 py-20 md:px-6 md:py-24">
           <div className="max-w-2xl">
             <SectionEyebrow>Demonstracao do sistema</SectionEyebrow>
             <SectionTitle>
@@ -378,8 +378,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="bg-white">
-        <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-6 md:py-24">
+      <section className="border-b border-[#c7d8e7] bg-[#f8fcff]">
+        <div className="mx-auto max-w-[1220px] px-5 py-20 md:px-6 md:py-24">
           <div className="max-w-2xl">
             <SectionEyebrow>Prova social</SectionEyebrow>
             <SectionTitle>
@@ -402,8 +402,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="faq" className="bg-[#F5F7FA]">
-        <div className="mx-auto max-w-[1200px] px-5 py-20 md:px-6 md:py-24">
+      <section id="faq" className="border-b border-[#c7d8e7] bg-[#eff5fb]">
+        <div className="mx-auto max-w-[1220px] px-5 py-20 md:px-6 md:py-24">
           <div className="max-w-2xl">
             <SectionEyebrow>FAQ</SectionEyebrow>
             <SectionTitle>
@@ -423,9 +423,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="bg-white">
-        <div className="mx-auto max-w-[1200px] px-5 pb-16 pt-6 md:px-6 md:pb-20">
-          <div className="rounded-[32px] bg-[#1E293B] px-6 py-8 text-white shadow-[0_24px_80px_rgba(30,41,59,0.18)] md:px-8 md:py-10">
+      <section className="bg-[#f8fcff]">
+        <div className="mx-auto max-w-[1220px] px-5 pb-16 pt-8 md:px-6 md:pb-20">
+          <div className="rounded-[14px] border border-[#1d466f]/30 bg-[linear-gradient(160deg,#18395c_0%,#1a4d81_56%,#1688e8_100%)] px-6 py-8 text-white shadow-[0_12px_34px_rgba(17,38,63,0.22)] md:px-8 md:py-10">
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
               <div>
                 <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70">
@@ -466,7 +466,7 @@ function PrimaryButton({
   return (
     <Link
       href={href}
-      className={`inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#00C853] font-semibold text-white transition hover:bg-[#00A844] ${
+      className={`inline-flex items-center justify-center gap-2 rounded-[8px] bg-[var(--brand-primary)] font-semibold text-white transition hover:bg-[var(--brand-primary-strong)] ${
         compact ? "px-4 py-2.5 text-sm" : "px-5 py-3.5 text-base"
       }`}
     >
@@ -488,10 +488,10 @@ function SecondaryButton({
   return (
     <Link
       href={href}
-      className={`inline-flex items-center justify-center rounded-[10px] border px-5 py-3.5 text-base font-semibold transition ${
+      className={`inline-flex items-center justify-center rounded-[8px] border px-5 py-3.5 text-base font-semibold transition ${
         dark
-          ? "border-white/18 bg-white/8 text-white hover:bg-white/12"
-          : "border-[#D7DEE7] bg-white text-[#111827] hover:border-[#00C853]/30 hover:text-[#00A844]"
+          ? "border-white/24 bg-white/8 text-white hover:bg-white/14"
+          : "border-[#bfd7ea] bg-white text-[var(--brand-ink)] hover:border-[#1688E8]/32 hover:text-[#0F7AD8]"
       }`}
     >
       {children}
@@ -501,7 +501,7 @@ function SecondaryButton({
 
 function SectionEyebrow({ children }: { children: ReactNode }) {
   return (
-    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#00A844]">
+    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0F7AD8]">
       {children}
     </div>
   );
@@ -523,8 +523,8 @@ function StatBadge({
   label: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-full border border-[#E5E7EB] bg-white px-4 py-2.5 shadow-[0_10px_22px_rgba(0,0,0,0.04)]">
-      <div className="flex items-center gap-1 text-[#00C853]">
+    <div className="flex items-center gap-3 rounded-[8px] border border-[#c7d8e7] bg-white px-4 py-2.5">
+      <div className="flex items-center gap-1 text-[#1688E8]">
         <Star className="h-4 w-4 fill-current" />
         <Star className="h-4 w-4 fill-current" />
         <Star className="h-4 w-4 fill-current" />
@@ -539,7 +539,7 @@ function StatBadge({
 
 function TrustItem({ text }: { text: string }) {
   return (
-    <div className="rounded-full border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#6B7280]">
+    <div className="rounded-[8px] border border-[#c7d8e7] bg-white px-3 py-2 text-sm text-[#6B7280]">
       {text}
     </div>
   );
@@ -563,13 +563,12 @@ function HeroMockup({
   products: typeof menuProducts;
 }) {
   return (
-    <div className="relative">
-      <div className="absolute inset-x-10 top-10 h-44 rounded-full bg-[#00C853]/16 blur-3xl" />
-      <div className="relative rounded-[32px] border border-[#E5E7EB] bg-white p-4 shadow-[0_30px_90px_rgba(17,24,39,0.10)]">
-        <div className="rounded-[28px] border border-[#E5E7EB] bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-4">
-          <div className="flex items-center justify-between gap-3 border-b border-[#EEF2F7] pb-4">
+    <div>
+      <div className="rounded-[12px] border border-[#c7d8e7] bg-white p-4 shadow-[0_8px_24px_rgba(28,61,94,0.12)]">
+        <div className="rounded-[10px] border border-[#D9E5F0] bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FBFF_100%)] p-4">
+          <div className="flex items-center justify-between gap-3 border-b border-[#E3EDF6] pb-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E8FFF1] text-[#00C853]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EAF5FF] text-[#1688E8]">
                 <Store className="h-5 w-5" />
               </div>
               <div>
@@ -580,12 +579,12 @@ function HeroMockup({
               </div>
             </div>
 
-            <div className="rounded-full bg-[#E8FFF1] px-3 py-1 text-xs font-semibold text-[#00A844]">
+            <div className="rounded-full bg-[#EAF5FF] px-3 py-1 text-xs font-semibold text-[#0F7AD8]">
               {statusLabel}
             </div>
           </div>
 
-          <div className="mt-4 rounded-[24px] bg-[#1E293B] p-5 text-white shadow-[0_20px_34px_rgba(30,41,59,0.20)]">
+          <div className="mt-4 rounded-[10px] bg-[#1A3554] p-5 text-white">
             <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
               sistema ao vivo
             </div>
@@ -611,7 +610,7 @@ function HeroMockup({
             {products.map((product) => (
               <div
                 key={product.id}
-                className="flex items-center justify-between rounded-[18px] border border-[#E5E7EB] bg-white px-3 py-3"
+                className="flex items-center justify-between rounded-[8px] border border-[#D9E5F0] bg-white px-3 py-3"
               >
                 <div className="min-w-0">
                   <div className="truncate text-sm font-semibold text-[#111827]">
@@ -649,7 +648,7 @@ function PreviewPill({
   value: string;
 }) {
   return (
-    <div className="rounded-[18px] border border-white/10 bg-white/8 p-3.5">
+    <div className="rounded-[8px] border border-white/16 bg-white/8 p-3.5">
       <div className="flex items-center gap-2 text-white/70">
         <Icon className="h-4 w-4" />
         <span className="text-xs font-medium">{label}</span>
@@ -669,7 +668,7 @@ function ProductCardPreview({
   price: string;
 }) {
   return (
-    <div className="rounded-[18px] border border-[#E5E7EB] bg-white p-4">
+    <div className="rounded-[8px] border border-[#D9E5F0] bg-white p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="truncate text-sm font-semibold text-[#111827]">
@@ -691,7 +690,7 @@ function MiniPanel({
   subtitle: string;
 }) {
   return (
-    <div className="rounded-[18px] border border-[#E5E7EB] bg-white p-3.5">
+    <div className="rounded-[8px] border border-[#D9E5F0] bg-white p-3.5">
       <div className="text-sm font-semibold text-[#111827]">{title}</div>
       <div className="mt-1 text-sm text-[#6B7280]">{subtitle}</div>
     </div>
@@ -706,8 +705,8 @@ function ModulePill({
   label: string;
 }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#6B7280] shadow-[0_8px_18px_rgba(0,0,0,0.03)]">
-      <Icon className="h-4 w-4 text-[#00C853]" />
+    <div className="inline-flex items-center gap-2 rounded-[8px] border border-[#D9E5F0] bg-white px-4 py-2 text-sm font-medium text-[#475569]">
+      <Icon className="h-4 w-4 text-[#1688E8]" />
       <span>{label}</span>
     </div>
   );
@@ -723,8 +722,8 @@ function BenefitCard({
   description: string;
 }) {
   return (
-    <article className="rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-[0_16px_36px_rgba(17,24,39,0.05)]">
-      <div className="inline-flex rounded-2xl bg-[#E8FFF1] p-3 text-[#00C853]">
+    <article className="rounded-[8px] border border-[#D9E5F0] bg-white p-6">
+      <div className="inline-flex rounded-[8px] border border-[#d6e6f4] bg-[#EAF5FF] p-2.5 text-[#1688E8]">
         <Icon className="h-5 w-5" />
       </div>
       <h3 className="mt-5 text-lg font-semibold text-[#111827]">{title}</h3>
@@ -746,7 +745,7 @@ function InlineCta({
 }) {
   return (
     <div
-      className={`rounded-[28px] border border-[#D8F5E2] bg-white p-6 shadow-[0_16px_36px_rgba(17,24,39,0.05)] ${className}`}
+      className={`rounded-[8px] border border-[#c7d8e7] bg-[#f8fbff] p-6 ${className}`}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="text-lg font-semibold text-[#111827]">{title}</div>
@@ -811,7 +810,7 @@ function FeatureShowcase({
 function FeatureLine({ text }: { text: string }) {
   return (
     <div className="flex items-start gap-3 text-sm leading-7 text-[#111827]">
-      <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#00C853]" />
+      <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#1688E8]" />
       <span>{text}</span>
     </div>
   );
@@ -831,8 +830,8 @@ function ShowcaseMock({
   products: typeof menuProducts;
 }) {
   return (
-    <div className="rounded-[28px] border border-[#E5E7EB] bg-[#F5F7FA] p-4 shadow-[0_18px_48px_rgba(17,24,39,0.06)]">
-      <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-4">
+    <div className="rounded-[8px] border border-[#D9E5F0] bg-[#F4F8FC] p-4">
+      <div className="rounded-[8px] border border-[#D9E5F0] bg-white p-4">
         {variant === "dashboard" ? (
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-3">
@@ -875,7 +874,7 @@ function ShowcaseMock({
               <MiniPanel title="Ticket medio" subtitle={avgTicket} />
               <MiniPanel title="Top item" subtitle="Combo destaque" />
             </div>
-            <div className="rounded-[18px] bg-[#F5F7FA] p-4">
+            <div className="rounded-[8px] bg-[#F4F8FC] p-4">
               <div className="flex items-end gap-2">
                 <Bar height="38%" />
                 <Bar height="52%" />
@@ -900,7 +899,7 @@ function DashboardStat({
   value: string;
 }) {
   return (
-    <div className="rounded-[18px] border border-[#E5E7EB] bg-[#F5F7FA] p-4">
+    <div className="rounded-[8px] border border-[#D9E5F0] bg-[#F4F8FC] p-4">
       <div className="text-sm text-[#6B7280]">{title}</div>
       <div className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[#111827]">
         {value}
@@ -919,7 +918,7 @@ function OrderRow({
   total: string;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-3">
+    <div className="flex items-center justify-between rounded-[8px] border border-[#D9E5F0] bg-white px-4 py-3">
       <div>
         <div className="text-sm font-semibold text-[#111827]">{title}</div>
         <div className="text-xs text-[#6B7280]">{status}</div>
@@ -931,7 +930,7 @@ function OrderRow({
 
 function Bar({ height }: { height: string }) {
   return (
-    <div className="flex-1 rounded-t-[10px] bg-[#00C853]" style={{ height }} />
+    <div className="flex-1 rounded-t-[10px] bg-[#1688E8]" style={{ height }} />
   );
 }
 
@@ -953,8 +952,8 @@ function DemoCard({
   products: typeof menuProducts;
 }) {
   return (
-    <article className="rounded-[28px] border border-[#E5E7EB] bg-white p-5 shadow-[0_18px_42px_rgba(17,24,39,0.05)]">
-      <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[#00A844]">
+    <article className="rounded-[8px] border border-[#D9E5F0] bg-white p-5">
+      <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[#0F7AD8]">
         {title}
       </div>
       <div className="mt-2 text-lg font-semibold text-[#111827]">{subtitle}</div>
@@ -981,8 +980,8 @@ function TestimonialCard({
   role: string;
 }) {
   return (
-    <article className="rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-[0_16px_36px_rgba(17,24,39,0.05)]">
-      <div className="flex items-center gap-1 text-[#00C853]">
+    <article className="rounded-[8px] border border-[#D9E5F0] bg-white p-6">
+      <div className="flex items-center gap-1 text-[#1688E8]">
         <Star className="h-4 w-4 fill-current" />
         <Star className="h-4 w-4 fill-current" />
         <Star className="h-4 w-4 fill-current" />
@@ -1004,10 +1003,10 @@ function FaqItem({
   answer: string;
 }) {
   return (
-    <details className="group rounded-[22px] border border-[#E5E7EB] bg-white p-5 shadow-[0_12px_24px_rgba(17,24,39,0.04)]">
+    <details className="group rounded-[8px] border border-[#D9E5F0] bg-white p-5">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left text-base font-semibold text-[#111827]">
         {question}
-        <span className="text-[#00A844] transition group-open:rotate-45">+</span>
+        <span className="text-[#0F7AD8] transition group-open:rotate-45">+</span>
       </summary>
       <p className="mt-4 max-w-3xl text-sm leading-7 text-[#6B7280]">{answer}</p>
     </details>
