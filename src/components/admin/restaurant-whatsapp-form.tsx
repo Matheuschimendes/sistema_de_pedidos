@@ -41,7 +41,8 @@ export function RestaurantWhatsappForm({
 
         <p className="mt-2 text-sm leading-6 text-zinc-500">
           Pode digitar com ou sem mascara. O sistema salva o numero pronto para
-          abrir a conversa no checkout.
+          abrir a conversa no checkout e identificar o WhatsApp oficial da loja
+          nas mensagens de status para o cliente.
         </p>
 
         {state?.errors?.whatsappNumber ? (

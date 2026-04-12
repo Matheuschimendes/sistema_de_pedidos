@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { ArrowUpRight, BarChart3, ClipboardList, Package } from "lucide-react";
 import { AdminShell } from "@/src/components/admin/admin-shell";
+import { RestaurantWhatsappForm } from "@/src/components/admin/restaurant-whatsapp-form";
 import { getAdminRestaurantId, requireAdminSession } from "@/src/lib/admin-auth";
 import { getRestaurantForAdmin, getAdminProducts, getAdminCategories } from "@/src/lib/menu-data";
 import { getAdminOrderMetrics } from "@/src/lib/orders";
+import { formatWhatsappDisplayNumber } from "@/src/lib/order-presentation";
+import { updateRestaurantWhatsappAction } from "./actions";
 
 export default async function DashboardPage() {
   const session = await requireAdminSession();
@@ -110,6 +113,36 @@ export default async function DashboardPage() {
               detail="Cadastrar item no catalogo."
             />
           </div>
+        </section>
+
+        <section className="rounded-[20px] border border-zinc-200 bg-white p-4 shadow-[0_14px_30px_rgba(15,23,42,0.06)]">
+          <h3 className="text-lg font-semibold tracking-tight text-zinc-900">
+            Numero da loja no WhatsApp
+          </h3>
+          <p className="mt-1 text-sm text-zinc-500">
+            Esse numero e usado para iniciar as conversas de pedidos no checkout
+            e nos avisos do painel.
+          </p>
+
+          <div className="mt-3 rounded-[14px] border border-zinc-200 bg-zinc-50 px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+              Numero atual
+            </p>
+            <p className="mt-1 text-base font-semibold text-zinc-900">
+              {restaurant.whatsappNumber
+                ? formatWhatsappDisplayNumber(restaurant.whatsappNumber)
+                : "Nao configurado"}
+            </p>
+          </div>
+
+          <RestaurantWhatsappForm
+            action={updateRestaurantWhatsappAction}
+            defaultValue={
+              restaurant.whatsappNumber
+                ? formatWhatsappDisplayNumber(restaurant.whatsappNumber)
+                : ""
+            }
+          />
         </section>
       </div>
     </AdminShell>
