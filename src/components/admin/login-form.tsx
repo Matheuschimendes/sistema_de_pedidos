@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { loginAdmin } from "@/src/app/(dashboard)/admin/login/actions";
@@ -11,11 +12,11 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <form action={formAction} className="mt-8 space-y-5">
+    <form action={formAction} className="mt-7 space-y-3.5">
       <div>
         <label
           htmlFor="email"
-          className="mb-2 block text-sm font-medium text-zinc-700"
+          className="mb-1.5 block text-[13px] font-medium text-zinc-700"
         >
           E-mail
         </label>
@@ -27,20 +28,20 @@ export function LoginForm() {
           autoComplete="email"
           autoCapitalize="none"
           spellCheck={false}
-          placeholder="voce@restaurante.com"
-          className="ds-input px-4 py-3.5 text-[15px] text-zinc-950 placeholder:text-zinc-400"
+          autoFocus
+          className="w-full rounded-[8px] border border-zinc-300 bg-white px-3.5 py-2 text-[14px] text-zinc-950 outline-none transition focus:border-zinc-900 focus:ring-4 focus:ring-sky-100"
           required
         />
 
         {state?.errors?.email ? (
-          <p className="mt-2 text-sm text-red-600">{state.errors.email[0]}</p>
+          <p className="mt-1.5 text-xs text-red-600">{state.errors.email[0]}</p>
         ) : null}
       </div>
 
       <div>
         <label
           htmlFor="password"
-          className="mb-2 block text-sm font-medium text-zinc-700"
+          className="mb-1.5 block text-[13px] font-medium text-zinc-700"
         >
           Senha
         </label>
@@ -51,49 +52,49 @@ export function LoginForm() {
             name="password"
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
-            placeholder="Digite sua senha"
-            className="ds-input px-4 py-3.5 pr-12 text-[15px] text-zinc-950 placeholder:text-zinc-400"
+            className="w-full rounded-[8px] border border-zinc-300 bg-[#f7f7f8] px-3.5 py-2 pr-11 text-[14px] text-zinc-950 outline-none transition focus:border-zinc-900 focus:ring-4 focus:ring-sky-100"
             required
           />
 
           <button
             type="button"
             onClick={() => setShowPassword((value) => !value)}
-            className="absolute inset-y-0 right-3 inline-flex items-center justify-center rounded-full px-2 text-zinc-500 transition hover:text-[var(--brand-primary)]"
+            className="absolute inset-y-0 right-2 inline-flex items-center justify-center rounded-full px-2 text-zinc-500 transition hover:text-zinc-800"
             aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
           >
             {showPassword ? (
-              <EyeOff className="h-5 w-5" />
+              <EyeOff className="h-4 w-4" />
             ) : (
-              <Eye className="h-5 w-5" />
+              <Eye className="h-4 w-4" />
             )}
           </button>
         </div>
 
         {state?.errors?.password ? (
-          <p className="mt-2 text-sm text-red-600">
+          <p className="mt-1.5 text-xs text-red-600">
             {state.errors.password[0]}
           </p>
         ) : null}
       </div>
 
       {state?.message ? (
-        <div className="rounded-[16px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-[8px] border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-700">
           {state.message}
         </div>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex w-full items-center justify-center rounded-[16px] bg-[var(--brand-primary)] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,115,230,0.18)] transition hover:bg-[var(--brand-primary-strong)] disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        {pending ? "Entrando..." : "Entrar"}
-      </button>
+      <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
+        <Link href="/" className="text-[13px] font-semibold text-[#1688e8] hover:underline">
+          Esqueci a senha
+        </Link>
 
-      <div className="rounded-[18px] border border-[var(--brand-border)]/90 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] px-4 py-4 text-sm leading-7 text-zinc-600">
-        Se precisar recuperar o acesso, fale com quem administra a operacao do
-        restaurante.
+        <button
+          type="submit"
+          disabled={pending}
+          className="inline-flex w-full items-center justify-center rounded-[8px] bg-[var(--brand-primary)] px-5 py-2 text-[14px] font-semibold text-white transition hover:bg-[var(--brand-primary-strong)] disabled:cursor-not-allowed disabled:opacity-70 sm:min-w-[138px] sm:w-auto"
+        >
+          {pending ? "Entrando..." : "Entrar"}
+        </button>
       </div>
     </form>
   );
