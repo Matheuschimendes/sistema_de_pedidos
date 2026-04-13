@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { createOrderAction } from "@/src/app/(public)/[slug]/checkout/actions";
+import { fetchAddressByCep, normalizeCep } from "@/src/lib/cep";
 import { formatBRL } from "@/src/lib/format";
 import {
   getCartFromStorage,
@@ -86,6 +87,14 @@ const CITY_OPTIONS_BY_STATE: Record<string, string[]> = {
   PE: ["Recife", "Olinda", "Jaboatao"],
 };
 
+const STATE_OPTION_BY_CODE = STATE_OPTIONS.reduce<Record<string, string>>(
+  (acc, stateLabel) => {
+    acc[getStateCode(stateLabel)] = stateLabel;
+    return acc;
+  },
+  {},
+);
+
 const CHECKOUT_STEPS: Array<{ id: CheckoutStep; label: string }> = [
   { id: "delivery", label: "Endereco" },
   { id: "additional", label: "Informacoes" },
@@ -96,9 +105,15 @@ function getStateCode(value: string) {
   return value.split("-")[0]?.trim() ?? "";
 }
 
-function getCityOptions(stateValue: string) {
+function getCityOptions(stateValue: string, currentCity?: string) {
   const stateCode = getStateCode(stateValue);
-  return CITY_OPTIONS_BY_STATE[stateCode] ?? ["Fortaleza"];
+  const cityOptions = CITY_OPTIONS_BY_STATE[stateCode] ?? [];
+
+  if (currentCity && !cityOptions.includes(currentCity)) {
+    return [currentCity, ...cityOptions];
+  }
+
+  return cityOptions.length > 0 ? cityOptions : currentCity ? [currentCity] : ["Fortaleza"];
 }
 
 function normalizeStoredCustomer(value: unknown): SavedCustomer {
@@ -145,10 +160,6 @@ function parseDraftFromAddress(address: string): DeliveryDraft {
     ...EMPTY_DELIVERY_DRAFT,
     street: address.trim(),
   };
-}
-
-function normalizeZipInput(value: string) {
-  return value.replace(/\D/g, "").slice(0, 8);
 }
 
 function normalizePhoneInput(value: string) {
@@ -278,6 +289,8 @@ export function CheckoutPageClient({
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [deliveryDraft, setDeliveryDraft] =
     useState<DeliveryDraft>(EMPTY_DELIVERY_DRAFT);
+  const [isZipLookupLoading, setIsZipLookupLoading] = useState(false);
+  const [zipLookupError, setZipLookupError] = useState<string | null>(null);
 
   const composedAddress = useMemo(() => {
     return buildAddressFromDraft(deliveryDraft);
@@ -371,15 +384,19 @@ export function CheckoutPageClient({
   }, [router, slug, successOrder]);
 
   const updateDeliveryField = (field: keyof DeliveryDraft, value: string) => {
-    const nextValue = field === "zip" ? normalizeZipInput(value) : value;
+    const nextValue = field === "zip" ? normalizeCep(value) : value;
 
     setDeliveryDraft((prev) => ({ ...prev, [field]: nextValue }));
     setSubmitError(null);
     setErrors((prev) => ({ ...prev, address: undefined }));
+
+    if (field === "zip") {
+      setZipLookupError(null);
+    }
   };
 
   const handleStateChange = (stateValue: string) => {
-    const stateCities = getCityOptions(stateValue);
+    const stateCities = getCityOptions(stateValue, deliveryDraft.city);
 
     setDeliveryDraft((prev) => ({
       ...prev,
@@ -408,6 +425,42 @@ export function CheckoutPageClient({
     }));
     setSubmitError(null);
     setErrors((prev) => ({ ...prev, address: undefined }));
+    setZipLookupError(null);
+  };
+
+  const handleLookupZip = async (zipValue = deliveryDraft.zip) => {
+    const normalizedZip = normalizeCep(zipValue);
+
+    if (normalizedZip.length !== 8) {
+      setZipLookupError("Informe um CEP valido com 8 digitos.");
+      return;
+    }
+
+    setIsZipLookupLoading(true);
+    setZipLookupError(null);
+
+    try {
+      const cepAddress = await fetchAddressByCep(normalizedZip);
+      const mappedState = STATE_OPTION_BY_CODE[cepAddress.stateCode] ?? deliveryDraft.state;
+      const cityOptions = getCityOptions(mappedState, cepAddress.city);
+
+      setDeliveryDraft((prev) => ({
+        ...prev,
+        zip: cepAddress.zip,
+        state: mappedState,
+        city: cityOptions.includes(cepAddress.city) ? cepAddress.city : prev.city,
+        district: cepAddress.district || prev.district,
+        street: cepAddress.street || prev.street,
+        complement: cepAddress.complement || prev.complement,
+      }));
+
+      setSubmitError(null);
+      setErrors((prev) => ({ ...prev, address: undefined }));
+    } catch {
+      setZipLookupError("Nao foi possivel localizar este CEP. Preencha manualmente.");
+    } finally {
+      setIsZipLookupLoading(false);
+    }
   };
 
   const validateIdentifyStep = () => {
@@ -705,7 +758,7 @@ export function CheckoutPageClient({
                           }
                           className="h-14 w-full appearance-none rounded-[10px] border border-zinc-300 bg-white px-4 pr-12 text-[16px] text-zinc-900 outline-none focus:border-zinc-800 sm:h-[62px] sm:rounded-[12px] sm:px-5 sm:pr-16 sm:text-[17px]"
                         >
-                          {getCityOptions(deliveryDraft.state).map((cityOption) => (
+                          {getCityOptions(deliveryDraft.state, deliveryDraft.city).map((cityOption) => (
                             <option key={cityOption} value={cityOption}>
                               {cityOption}
                             </option>
@@ -755,6 +808,11 @@ export function CheckoutPageClient({
                           onChange={(event) =>
                             updateDeliveryField("zip", event.target.value)
                           }
+                          onBlur={(event) => {
+                            if (normalizeCep(event.target.value).length === 8) {
+                              void handleLookupZip(event.target.value);
+                            }
+                          }}
                           inputMode="numeric"
                           placeholder="60337350"
                           className="h-14 w-full rounded-[10px] border border-zinc-300 bg-white px-4 pr-12 text-[16px] text-zinc-900 outline-none focus:border-zinc-800 sm:h-[62px] sm:rounded-[12px] sm:px-5 sm:pr-16 sm:text-[17px]"
@@ -766,6 +824,26 @@ export function CheckoutPageClient({
                           />
                         ) : null}
                       </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void handleLookupZip();
+                          }}
+                          disabled={
+                            isZipLookupLoading || normalizeCep(deliveryDraft.zip).length !== 8
+                          }
+                          className="inline-flex h-9 items-center justify-center rounded-[10px] border border-zinc-300 bg-white px-3 text-[13px] font-medium text-zinc-800 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {isZipLookupLoading ? "Buscando CEP..." : "Buscar CEP"}
+                        </button>
+                        <span className="text-[12px] text-zinc-500">
+                          Preenche rua, bairro, cidade e estado automaticamente.
+                        </span>
+                      </div>
+                      {zipLookupError ? (
+                        <div className="mt-2 text-[12px] text-red-600">{zipLookupError}</div>
+                      ) : null}
                     </div>
 
                     <div>

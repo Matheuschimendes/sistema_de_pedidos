@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Search, Star, Clock3, Truck, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { createOrderAction } from "@/src/app/(public)/[slug]/checkout/actions";
+import { fetchAddressByCep, normalizeCep } from "@/src/lib/cep";
 import { getRestaurantBusinessStatus } from "@/src/lib/get-restaurant-business-status";
 import { matchesProductSearch } from "@/src/lib/menu-groups";
 import { useCart } from "@/src/hooks/use-cart";
@@ -619,6 +620,9 @@ function CartDrawer({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successOrder, setSuccessOrder] = useState<string | null>(null);
+  const [addressZip, setAddressZip] = useState("");
+  const [isAddressZipLookupLoading, setIsAddressZipLookupLoading] = useState(false);
+  const [addressZipLookupError, setAddressZipLookupError] = useState<string | null>(null);
 
   const checkoutItems = useMemo(() => {
     return items
@@ -633,11 +637,9 @@ function CartDrawer({
     checkoutItems.length === 1
       ? "1 produto na sacola"
       : `${checkoutItems.length} produtos na sacola`;
-  const totalUnits = checkoutItems.reduce((acc, item) => acc + item.quantity, 0);
-  const totalUnitsLabel = totalUnits === 1 ? "1 item" : `${totalUnits} itens`;
   const stepTitle =
     step === "address"
-      ? "Endereco"
+      ? "Endereço"
       : step === "checkout"
       ? "Finalizar pedido"
       : step === "success"
@@ -646,7 +648,7 @@ function CartDrawer({
   const sidebarDeliveryFee = deliveryType === "delivery" ? deliveryFee : 0;
   const sidebarTotal = subtotal + sidebarDeliveryFee;
   const checkoutFlowSteps: Array<{ id: "address" | "checkout"; label: string }> = [
-    { id: "address", label: "Endereco" },
+    { id: "address", label: "Endereço" },
     { id: "checkout", label: "Dados e pagamento" },
   ];
   const currentCheckoutStepIndex = checkoutFlowSteps.findIndex((flowStep) => {
@@ -669,6 +671,9 @@ function CartDrawer({
     setCustomerErrors({});
     setIsSubmitting(false);
     setSuccessOrder(null);
+    setAddressZip("");
+    setIsAddressZipLookupLoading(false);
+    setAddressZipLookupError(null);
   };
 
   const handleCloseDrawer = () => {
@@ -700,6 +705,42 @@ function CartDrawer({
     }));
     setSubmitError(null);
     setCustomerErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
+  const handleLookupAddressZip = async (zipValue = addressZip) => {
+    const normalizedZip = normalizeCep(zipValue);
+
+    if (normalizedZip.length !== 8) {
+      setAddressZipLookupError("Informe um CEP valido com 8 digitos.");
+      return;
+    }
+
+    setIsAddressZipLookupLoading(true);
+    setAddressZipLookupError(null);
+
+    try {
+      const cepAddress = await fetchAddressByCep(normalizedZip);
+      const autoAddress = [
+        cepAddress.street,
+        cepAddress.district,
+        `${cepAddress.city} - ${cepAddress.stateCode}`,
+        `CEP ${cepAddress.zip}`,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      setAddressZip(cepAddress.zip);
+      setCustomer((prev) => ({
+        ...prev,
+        address: autoAddress || prev.address,
+      }));
+      setCustomerErrors((prev) => ({ ...prev, address: undefined }));
+      setSubmitError(null);
+    } catch {
+      setAddressZipLookupError("CEP nao encontrado. Preencha o endereco manualmente.");
+    } finally {
+      setIsAddressZipLookupLoading(false);
+    }
   };
 
   const handleAdvanceToCheckoutDetails = () => {
@@ -878,7 +919,6 @@ function CartDrawer({
         {step === "cart" ? (
           <>
             <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3.5">
-              <div className="text-[18px] font-semibold text-zinc-900">{totalUnitsLabel}</div>
               <div className="text-[18px] font-semibold text-zinc-900">
                 Total: {formatBRL(total)}
               </div>
@@ -979,17 +1019,11 @@ function CartDrawer({
         {step === "address" ? (
           <>
             <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3.5">
-              <div className="text-[15px] font-medium text-zinc-600">{totalUnitsLabel}</div>
-              <div className="text-[17px] font-semibold text-zinc-900">
-                Total: {formatBRL(sidebarTotal)}
-              </div>
+              <div className="text-[13px] font-medium text-zinc-500">Etapa 1: Endereço</div>
             </div>
 
             <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain px-5 py-4 [-webkit-overflow-scrolling:touch]">
               <div className="rounded-[12px] border border-zinc-200 bg-zinc-50 p-3">
-                <div className="text-[12px] font-semibold uppercase tracking-[0.04em] text-zinc-500">
-                  Endereco
-                </div>
                 <div className="mt-1 text-[12px] text-zinc-500">
                   Defina como o cliente vai receber o pedido.
                 </div>
@@ -1000,6 +1034,7 @@ function CartDrawer({
                     onClick={() => {
                       setDeliveryType("delivery");
                       setSubmitError(null);
+                      setAddressZipLookupError(null);
                       setCustomerErrors((prev) => ({ ...prev, address: undefined }));
                     }}
                     className={`rounded-md border px-3 py-2 text-sm font-medium transition ${
@@ -1015,6 +1050,7 @@ function CartDrawer({
                     onClick={() => {
                       setDeliveryType("pickup");
                       setSubmitError(null);
+                      setAddressZipLookupError(null);
                       setCustomerErrors((prev) => ({ ...prev, address: undefined }));
                     }}
                     className={`rounded-md border px-3 py-2 text-sm font-medium transition ${
@@ -1043,6 +1079,48 @@ function CartDrawer({
               <div className="rounded-[12px] border border-zinc-200 bg-zinc-50 p-3">
                 {deliveryType === "delivery" ? (
                   <div className="mt-3 space-y-2">
+                    <label className="block text-xs font-medium text-zinc-600" htmlFor="sidebar-address-zip">
+                      CEP
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="sidebar-address-zip"
+                        value={addressZip}
+                        onChange={(event) => {
+                          setAddressZip(normalizeCep(event.target.value));
+                          setAddressZipLookupError(null);
+                          setSubmitError(null);
+                        }}
+                        onBlur={(event) => {
+                          if (normalizeCep(event.target.value).length === 8) {
+                            void handleLookupAddressZip(event.target.value);
+                          }
+                        }}
+                        inputMode="numeric"
+                        placeholder="60337350"
+                        className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-900"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void handleLookupAddressZip();
+                        }}
+                        disabled={
+                          isAddressZipLookupLoading || normalizeCep(addressZip).length !== 8
+                        }
+                        className="inline-flex h-9 shrink-0 items-center justify-center rounded-md border border-zinc-300 bg-white px-3 text-xs font-medium text-zinc-800 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isAddressZipLookupLoading ? "Buscando..." : "Buscar CEP"}
+                      </button>
+                    </div>
+                    {addressZipLookupError ? (
+                      <div className="text-[12px] text-red-500">{addressZipLookupError}</div>
+                    ) : (
+                      <div className="text-[12px] text-zinc-500">
+                        Preenche endereco automaticamente.
+                      </div>
+                    )}
+
                     <label className="block text-xs font-medium text-zinc-600" htmlFor="sidebar-address-step">
                       Endereco de entrega
                     </label>
@@ -1070,39 +1148,20 @@ function CartDrawer({
             </div>
 
             <div className="border-t border-zinc-200 px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-4">
-              <div className="mb-2 flex items-center justify-between text-sm text-zinc-600">
-                <span>Subtotal</span>
-                <span>{formatBRL(subtotal)}</span>
-              </div>
-              <div className="mb-2 flex items-center justify-between text-sm text-zinc-600">
-                <span>Entrega</span>
-                <span>
-                  {deliveryType === "pickup"
-                    ? "Gratis"
-                    : deliveryFeeToCombine
-                      ? "A combinar"
-                      : formatBRL(deliveryFee)}
-                </span>
-              </div>
-              <div className="mb-3 flex items-center justify-between border-t border-zinc-200 pt-2 text-base font-semibold text-zinc-900">
-                <span>Total</span>
-                <span>{formatBRL(sidebarTotal)}</span>
-              </div>
-
               <button
                 type="button"
                 onClick={handleAdvanceToCheckoutDetails}
                 disabled={checkoutItems.length === 0}
                 className="block w-full rounded-[12px] bg-zinc-950 px-4 py-3 text-center text-[16px] font-semibold text-white transition hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Continuar para dados ({formatBRL(sidebarTotal)})
+                Continuar para dados
               </button>
 
               {submitError ? (
                 <div className="mt-2 text-[12px] text-red-500">{submitError}</div>
               ) : (
                 <div className="mt-2 text-[12px] text-zinc-500">
-                  Etapa 1 do checkout: endereco.
+                  Etapa 1 do checkout: endereço.
                 </div>
               )}
             </div>
@@ -1111,13 +1170,6 @@ function CartDrawer({
 
         {step === "checkout" ? (
           <>
-            <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3.5">
-              <div className="text-[15px] font-medium text-zinc-600">{totalUnitsLabel}</div>
-              <div className="text-[17px] font-semibold text-zinc-900">
-                Total: {formatBRL(sidebarTotal)}
-              </div>
-            </div>
-
             <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain px-5 py-4 [-webkit-overflow-scrolling:touch]">
               <div className="rounded-[12px] border border-zinc-200 bg-zinc-50 p-3">
                 <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.04em] text-zinc-500">
@@ -1133,11 +1185,11 @@ function CartDrawer({
                       onClick={() => setStep("address")}
                       className="text-xs font-medium text-zinc-600 underline underline-offset-2"
                     >
-                      Alterar endereco
+                      Alterar endereço
                     </button>
                   </div>
                 ) : (
-                  <div className="text-sm text-zinc-700">Retirada no balcao.</div>
+                  <div className="text-sm text-zinc-700">Retirada no balcão.</div>
                 )}
               </div>
 
@@ -1251,7 +1303,7 @@ function CartDrawer({
                 disabled={isSubmitting || checkoutItems.length === 0}
                 className="block w-full rounded-[12px] bg-zinc-950 px-4 py-3 text-center text-[16px] font-semibold text-white transition hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {isSubmitting ? "Confirmando pedido..." : `Confirmar pedido (${formatBRL(sidebarTotal)})`}
+                {isSubmitting ? "Confirmando pedido..." : `Confirmar pedido: ${formatBRL(sidebarTotal)}`}
               </button>
 
               {submitError ? (
