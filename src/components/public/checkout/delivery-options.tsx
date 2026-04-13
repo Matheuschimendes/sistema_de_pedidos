@@ -1,3 +1,4 @@
+import { Bike, Store } from "lucide-react";
 import { DeliveryType } from "@/src/types/checkout";
 
 type DeliveryOptionsProps = {
@@ -23,45 +24,56 @@ export function DeliveryOptions({
       : "grátis";
 
   return (
-    <div className="ds-panel p-5">
-      <div className="font-ui-mono text-[11px] uppercase tracking-[0.02em] text-[var(--brand-primary)]">
+    <div className="rounded-[12px] border border-zinc-200 bg-white p-4 shadow-[0_10px_22px_rgba(37,68,94,0.08)] sm:p-5">
+      <div className="font-ui-mono text-[10px] uppercase tracking-[0.06em] text-[#1688e8]">
         Tipo de entrega
       </div>
-      <div className="mb-4 mt-2 text-sm leading-6 text-zinc-500">
-        Escolha se você prefere receber em casa ou retirar seu pedido no
-        balcão.
+      <div className="mb-3 mt-1.5 text-[13px] leading-6 text-zinc-600">
+        Escolha se voce prefere receber em casa ou retirar no balcao.
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <button
+          type="button"
           onClick={() => onChange("delivery")}
-          className={`rounded-[18px] border p-[18px] text-center shadow-sm transition ${value === "delivery"
-            ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] shadow-[0_12px_22px_rgba(0,115,230,0.12)]"
-            : "border-[var(--brand-border)] bg-white"
-            }`}
+          className={`rounded-[10px] border px-3 py-3 text-center transition ${
+            value === "delivery"
+              ? "border-[#1688e8] bg-[#eaf5ff] shadow-[0_8px_18px_rgba(22,136,232,0.16)]"
+              : "border-zinc-200 bg-zinc-50 hover:bg-white"
+          }`}
         >
-          <div className="text-[1.75rem]">🚚</div>
-          <div className="mt-1.5 text-base font-semibold text-[var(--brand-ink)]">
+          <div className="flex justify-center">
+            <span className="inline-flex rounded-[8px] border border-zinc-200 bg-white p-1.5 text-[#1688e8]">
+              <Bike className="h-4 w-4" />
+            </span>
+          </div>
+          <div className="mt-1.5 text-[14px] font-semibold text-zinc-900">
             Entrega
           </div>
-          <div className="mt-1 text-sm text-zinc-400">
+          <div className="mt-0.5 text-[12px] text-zinc-600">
             + {deliveryFeeLabel}
           </div>
         </button>
 
         <button
+          type="button"
           onClick={() => onChange("pickup")}
-          className={`rounded-[18px] border p-[18px] text-center shadow-sm transition ${value === "pickup"
-            ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] shadow-[0_12px_22px_rgba(0,115,230,0.12)]"
-            : "border-[var(--brand-border)] bg-white"
-            }`}
+          className={`rounded-[10px] border px-3 py-3 text-center transition ${
+            value === "pickup"
+              ? "border-[#1688e8] bg-[#eaf5ff] shadow-[0_8px_18px_rgba(22,136,232,0.16)]"
+              : "border-zinc-200 bg-zinc-50 hover:bg-white"
+          }`}
         >
-          <div className="text-[1.75rem]">🙋</div>
-          <div className="mt-1.5 text-base font-semibold text-[var(--brand-ink)]">
+          <div className="flex justify-center">
+            <span className="inline-flex rounded-[8px] border border-zinc-200 bg-white p-1.5 text-[#1688e8]">
+              <Store className="h-4 w-4" />
+            </span>
+          </div>
+          <div className="mt-1.5 text-[14px] font-semibold text-zinc-900">
             Retirada
           </div>
-          <div className="mt-1 text-sm text-zinc-400">
-            No balcão · grátis
+          <div className="mt-0.5 text-[12px] text-zinc-600">
+            No balcao - gratis
           </div>
         </button>
       </div>

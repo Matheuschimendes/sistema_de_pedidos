@@ -14,8 +14,8 @@ import { prisma } from "@/src/lib/prisma";
 const customerSchema = z.object({
   name: z.string().trim().min(2, "Informe seu nome."),
   phone: z.string().trim().min(8, "Informe um WhatsApp valido."),
-  address: z.string().trim().optional(),
-  notes: z.string().trim().optional(),
+  address: z.string().trim().max(180, "Endereco muito longo.").optional(),
+  notes: z.string().trim().max(280, "Observacoes muito longas.").optional(),
 });
 
 const checkoutOrderSchema = z.object({
@@ -134,13 +134,24 @@ export async function createOrderAction(
 
   const { slug, customer, deliveryType, paymentMethod } = validatedFields.data;
   const requestedItems = groupRequestedItems(validatedFields.data.items);
-  const customerPhone =
-    normalizePhoneNumber(customer.phone) || customer.phone.trim();
+  const customerPhone = normalizePhoneNumber(customer.phone);
+  const hasValidCustomerWhatsapp =
+    customerPhone.startsWith("55") &&
+    (customerPhone.length === 12 || customerPhone.length === 13);
 
-  if (deliveryType === "delivery" && !customer.address?.trim()) {
+  if (!hasValidCustomerWhatsapp) {
     return {
       ok: false,
-      message: "Preencha o endereco para pedidos com entrega.",
+      message: "Informe um WhatsApp valido com DDD para confirmar o pedido.",
+    };
+  }
+
+  const trimmedAddress = customer.address?.trim() ?? "";
+
+  if (deliveryType === "delivery" && trimmedAddress.length < 8) {
+    return {
+      ok: false,
+      message: "Preencha um endereco de entrega completo para continuar.",
     };
   }
 
@@ -214,7 +225,7 @@ export async function createOrderAction(
       paymentMethod,
       customerName: customer.name,
       customerPhone,
-      customerAddress: deliveryType === "delivery" ? customer.address?.trim() : null,
+      customerAddress: deliveryType === "delivery" ? trimmedAddress : null,
       customerNotes: customer.notes?.trim() || null,
       subtotal: totals.subtotal,
       deliveryFee: totals.deliveryFee,

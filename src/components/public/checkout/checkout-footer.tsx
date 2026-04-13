@@ -1,3 +1,4 @@
+import { ShieldCheck } from "lucide-react";
 import { formatBRL } from "@/src/lib/format";
 
 type CheckoutFooterProps = {
@@ -8,6 +9,10 @@ type CheckoutFooterProps = {
   total: number;
   showDeliveryFee: boolean;
   disabled?: boolean;
+  isSubmitting?: boolean;
+  ctaLabel?: string;
+  helperMessage?: string | null;
+  validationHint?: string | null;
   errorMessage?: string | null;
   onConfirm: () => void;
 };
@@ -20,60 +25,75 @@ export function CheckoutFooter({
   total,
   showDeliveryFee,
   disabled,
+  isSubmitting = false,
+  ctaLabel = "Confirmar pedido",
+  helperMessage,
+  validationHint,
   errorMessage,
   onConfirm,
 }: CheckoutFooterProps) {
   return (
-    <div className="fixed bottom-0 left-1/2 w-full max-w-[520px] -translate-x-1/2 border-t border-[var(--brand-border)]/75 bg-white/96 px-4 py-4 backdrop-blur-xl">
-      <div className="mb-3 space-y-1">
-        <div className="flex justify-between text-sm text-zinc-500">
+    <div className="fixed bottom-0 left-1/2 w-full max-w-[540px] -translate-x-1/2 border-t border-black/10 bg-[#f2f2f3]/96 px-4 pb-[calc(0.9rem+env(safe-area-inset-bottom))] pt-3.5 backdrop-blur-xl sm:px-5">
+      <div className="mb-2.5 rounded-[10px] border border-zinc-200 bg-white px-3 py-2.5">
+        <div className="flex justify-between text-[13px] text-zinc-600">
           <span>Subtotal</span>
           <span>{formatBRL(subtotal)}</span>
         </div>
 
         {showDeliveryFee && (
-          <div className="flex justify-between text-sm text-zinc-500">
+          <div className="mt-1 flex justify-between text-[13px] text-zinc-600">
             <span>Taxa de entrega</span>
             <span>{deliveryFeeToCombine ? "A combinar" : formatBRL(deliveryFee)}</span>
           </div>
         )}
 
         {discount > 0 && (
-          <div className="flex justify-between text-sm text-zinc-500">
+          <div className="mt-1 flex justify-between text-[13px] text-zinc-600">
             <span>Desconto</span>
             <span>- {formatBRL(discount)}</span>
           </div>
         )}
       </div>
 
-      <div className="mb-2 flex justify-between text-xl font-semibold text-[var(--brand-ink)]">
+      <div className="mb-2 flex justify-between text-[19px] font-semibold text-zinc-900">
         <span>{deliveryFeeToCombine ? "Total parcial" : "Total"}</span>
-        <span className="text-[var(--brand-accent)]">{formatBRL(total)}</span>
+        <span className="text-[#1688e8]">{formatBRL(total)}</span>
       </div>
 
       {deliveryFeeToCombine ? (
-        <div className="mb-2 text-xs text-zinc-400">
-          A taxa de entrega será combinada no atendimento.
+        <div className="mb-2 text-[11px] text-zinc-500">
+          A taxa de entrega sera combinada no atendimento.
         </div>
       ) : null}
 
-      <div className="mb-4 text-sm text-zinc-500">
-        Ao confirmar, seu pedido sera registrado no sistema e, se houver
-        WhatsApp configurado, a conversa sera aberta pronta para envio.
+      <div className="mb-3 rounded-[10px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] text-emerald-800">
+        <div className="flex items-start gap-2">
+          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            {helperMessage ??
+              "Seu pedido sera registrado no sistema e, se houver WhatsApp configurado, a conversa abrira pronta para envio."}
+          </span>
+        </div>
       </div>
 
       {errorMessage ? (
-        <div className="mb-4 rounded-[16px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-3 rounded-[10px] border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-700">
           {errorMessage}
+        </div>
+      ) : null}
+
+      {!errorMessage && validationHint ? (
+        <div className="mb-3 rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-800">
+          {validationHint}
         </div>
       ) : null}
 
       <button
         onClick={onConfirm}
         disabled={disabled}
-        className="w-full rounded-[16px] bg-[var(--brand-primary)] px-4 py-3.5 text-base font-semibold text-white shadow-[0_14px_28px_rgba(0,115,230,0.18)] transition hover:bg-[var(--brand-primary-strong)] disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:shadow-none"
+        className="w-full rounded-[8px] bg-[var(--brand-primary)] px-4 py-2.5 text-[14px] font-semibold text-white shadow-[0_10px_20px_rgba(0,115,230,0.18)] transition hover:bg-[var(--brand-primary-strong)] disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:shadow-none"
       >
-        ✓ Confirmar pedido
+        {isSubmitting ? "Enviando pedido..." : `✓ ${ctaLabel}`}
       </button>
     </div>
   );

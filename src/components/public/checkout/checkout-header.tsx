@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
 import { getNameInitials } from "@/src/lib/get-name-initials";
 
 type CheckoutHeaderProps = {
@@ -16,22 +17,22 @@ export function CheckoutHeader({
   const restaurantInitials = getNameInitials(restaurantName);
 
   return (
-    <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-[var(--brand-border)]/75 bg-white/92 px-4 py-4 backdrop-blur-xl">
+    <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-black/8 bg-[#f2f2f3]/95 px-4 py-3.5 backdrop-blur-xl sm:px-5">
       <Link
         href={`/${slug}`}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--brand-border)] bg-white text-base text-zinc-500 shadow-sm"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-zinc-300 bg-white text-base text-zinc-500 transition hover:text-zinc-900"
       >
         ←
       </Link>
 
-      <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[16px] border border-[var(--brand-border)] bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)]">
+      <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-zinc-300 bg-white">
         {restaurantLogo ? (
           <Image
             src={restaurantLogo}
             alt={`Logo do restaurante ${restaurantName}`}
             fill
             sizes="40px"
-            className="object-contain p-1.5"
+            className="object-contain p-1"
           />
         ) : (
           <span className="text-sm font-semibold text-zinc-900">
@@ -41,13 +42,19 @@ export function CheckoutHeader({
       </div>
 
       <div className="min-w-0">
-        <div className="font-ui-mono text-[11px] uppercase tracking-[0.02em] text-[var(--brand-primary)]">
-          Checkout
+        <div className="flex items-center gap-1.5">
+          <div className="font-ui-mono text-[10px] uppercase tracking-[0.06em] text-[#1688e8]">
+            Checkout
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">
+            <ShieldCheck className="h-3 w-3" />
+            Seguro
+          </span>
         </div>
-        <div className="text-base font-semibold text-[var(--brand-ink)]">
+        <div className="text-[15px] font-semibold text-zinc-900">
           Finalizar pedido
         </div>
-        <div className="truncate text-sm text-zinc-500">
+        <div className="truncate text-[13px] text-zinc-600">
           {restaurantName}
         </div>
       </div>

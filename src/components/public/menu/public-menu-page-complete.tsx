@@ -1,17 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { Search, Star, Clock3, Truck, Trash2 } from "lucide-react";
+import { Search, Star, Clock3, Truck, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { createOrderAction } from "@/src/app/(public)/[slug]/checkout/actions";
 import { getRestaurantBusinessStatus } from "@/src/lib/get-restaurant-business-status";
 import { matchesProductSearch } from "@/src/lib/menu-groups";
 import { useCart } from "@/src/hooks/use-cart";
 import { Cart, Product } from "@/src/types/menu";
+import { DeliveryType, PaymentMethod } from "@/src/types/checkout";
 import { RestaurantProfile } from "@/src/types/restaurant";
 import { getCartStorageKey } from "@/src/lib/storage-keys";
 import { formatBRL } from "@/src/lib/format";
 import { getNameInitials } from "@/src/lib/get-name-initials";
+import { normalizePhoneNumber } from "@/src/lib/order-presentation";
 
 type PublicMenuPageClientProps = {
   slug: string;
@@ -52,6 +54,87 @@ type CartDrawerProps = {
   onIncrease: (id: number) => void;
   onDecrease: (id: number) => void;
 };
+
+type SidebarStep = "cart" | "address" | "checkout" | "success";
+type DrawerCustomerField = "name" | "phone" | "address";
+type DrawerCustomerErrors = Partial<Record<DrawerCustomerField, string>>;
+
+type DrawerCustomer = {
+  name: string;
+  phone: string;
+  address: string;
+  notes: string;
+};
+
+const EMPTY_DRAWER_CUSTOMER: DrawerCustomer = {
+  name: "",
+  phone: "",
+  address: "",
+  notes: "",
+};
+
+function formatPhoneInput(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+
+  if (digits.length <= 2) {
+    return digits;
+  }
+
+  if (digits.length <= 6) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  }
+
+  if (digits.length <= 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
+function validateDrawerCustomer(
+  customer: DrawerCustomer,
+  deliveryType: DeliveryType,
+) {
+  const errors: DrawerCustomerErrors = {};
+
+  if (customer.name.trim().length < 2) {
+    errors.name = "Informe seu nome completo.";
+  }
+
+  const normalizedPhone = normalizePhoneNumber(customer.phone);
+  const hasValidWhatsapp =
+    normalizedPhone.startsWith("55") &&
+    (normalizedPhone.length === 12 || normalizedPhone.length === 13);
+
+  if (!hasValidWhatsapp) {
+    errors.phone = "Informe um WhatsApp valido com DDD.";
+  }
+
+  if (deliveryType === "delivery" && customer.address.trim().length < 8) {
+    errors.address = "Preencha o endereco de entrega.";
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
+}
+
+function getFirstDrawerErrorField(errors: DrawerCustomerErrors) {
+  if (errors.name) {
+    return "name";
+  }
+
+  if (errors.phone) {
+    return "phone";
+  }
+
+  if (errors.address) {
+    return "address";
+  }
+
+  return null;
+}
 
 export function PublicMenuPageClient({
   slug,
@@ -397,7 +480,6 @@ export function PublicMenuPageClient({
         onClose={() => setDrawerOpen(false)}
         onClear={() => {
           clearCart();
-          setDrawerOpen(false);
         }}
         onIncrease={(id) => addToCart(id)}
         onDecrease={(id) => changeQty(id, -1)}
@@ -503,7 +585,7 @@ function CartBar({ totalItems, subtotal, onOpenCart }: CartBarProps) {
             <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/20 text-xs font-semibold text-white">
               {totalItems}
             </div>
-            <div className="text-sm font-semibold text-white">Ver carrinho e finalizar</div>
+            <div className="text-sm font-semibold text-white">Ver sacola e avancar</div>
           </div>
 
           <div className="text-base font-semibold text-[var(--brand-accent)]">
@@ -529,124 +611,682 @@ function CartDrawer({
   onIncrease,
   onDecrease,
 }: CartDrawerProps) {
-  const itemCountLabel =
-    items.length === 1 ? "1 item no pedido" : `${items.length} itens no pedido`;
+  const [step, setStep] = useState<SidebarStep>("cart");
+  const [deliveryType, setDeliveryType] = useState<DeliveryType>("delivery");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
+  const [customer, setCustomer] = useState<DrawerCustomer>(EMPTY_DRAWER_CUSTOMER);
+  const [customerErrors, setCustomerErrors] = useState<DrawerCustomerErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successOrder, setSuccessOrder] = useState<string | null>(null);
+
+  const checkoutItems = useMemo(() => {
+    return items
+      .map((item) => ({
+        id: item.id,
+        quantity: cart[item.id] || 0,
+      }))
+      .filter((item) => item.quantity > 0);
+  }, [cart, items]);
+
+  const uniqueItemsLabel =
+    checkoutItems.length === 1
+      ? "1 produto na sacola"
+      : `${checkoutItems.length} produtos na sacola`;
+  const totalUnits = checkoutItems.reduce((acc, item) => acc + item.quantity, 0);
+  const totalUnitsLabel = totalUnits === 1 ? "1 item" : `${totalUnits} itens`;
+  const stepTitle =
+    step === "address"
+      ? "Endereco"
+      : step === "checkout"
+      ? "Finalizar pedido"
+      : step === "success"
+        ? "Pedido confirmado"
+        : "Sua Sacola";
+  const sidebarDeliveryFee = deliveryType === "delivery" ? deliveryFee : 0;
+  const sidebarTotal = subtotal + sidebarDeliveryFee;
+  const checkoutFlowSteps: Array<{ id: "address" | "checkout"; label: string }> = [
+    { id: "address", label: "Endereco" },
+    { id: "checkout", label: "Dados e pagamento" },
+  ];
+  const currentCheckoutStepIndex = checkoutFlowSteps.findIndex((flowStep) => {
+    return flowStep.id === step;
+  });
+
+  const paymentOptions: Array<{ value: PaymentMethod; label: string }> = [
+    { value: "pix", label: "Pix" },
+    { value: "credit", label: "Credito" },
+    { value: "debit", label: "Debito" },
+    { value: "cash", label: "Dinheiro" },
+  ];
+
+  const resetDrawerState = () => {
+    setStep("cart");
+    setDeliveryType("delivery");
+    setPaymentMethod("pix");
+    setCustomer(EMPTY_DRAWER_CUSTOMER);
+    setSubmitError(null);
+    setCustomerErrors({});
+    setIsSubmitting(false);
+    setSuccessOrder(null);
+  };
+
+  const handleCloseDrawer = () => {
+    resetDrawerState();
+    onClose();
+  };
+
+  useEffect(() => {
+    if (!open || step !== "success") {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      resetDrawerState();
+      onClose();
+    }, 2200);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [onClose, open, step]);
+
+  const updateCustomer = (field: keyof DrawerCustomer, value: string) => {
+    const nextValue = field === "phone" ? formatPhoneInput(value) : value;
+
+    setCustomer((prev) => ({
+      ...prev,
+      [field]: nextValue,
+    }));
+    setSubmitError(null);
+    setCustomerErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
+  const handleAdvanceToCheckoutDetails = () => {
+    if (checkoutItems.length === 0) {
+      setSubmitError("Adicione itens na sacola para continuar.");
+      setStep("cart");
+      return;
+    }
+
+    if (deliveryType === "delivery" && customer.address.trim().length < 8) {
+      setCustomerErrors((prev) => ({
+        ...prev,
+        address: "Preencha o endereco de entrega.",
+      }));
+      setSubmitError("Revise os dados do endereco para continuar.");
+      return;
+    }
+
+    setSubmitError(null);
+    setCustomerErrors((prev) => ({ ...prev, address: undefined }));
+    setStep("checkout");
+  };
+
+  const handleConfirm = async () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    if (checkoutItems.length === 0) {
+      setSubmitError("Adicione itens na sacola para confirmar o pedido.");
+      setStep("cart");
+      return;
+    }
+
+    const validation = validateDrawerCustomer(customer, deliveryType);
+
+    if (!validation.isValid) {
+      setCustomerErrors(validation.errors);
+      setSubmitError("Revise os dados obrigatorios para continuar.");
+
+      if (validation.errors.address) {
+        setStep("address");
+        return;
+      }
+
+      const firstErrorField = getFirstDrawerErrorField(validation.errors);
+      const invalidInput = firstErrorField
+        ? document.getElementById(`sidebar-checkout-${firstErrorField}`)
+        : null;
+
+      invalidInput?.focus();
+      return;
+    }
+
+    setCustomerErrors({});
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    const normalizedPhone = normalizePhoneNumber(customer.phone);
+
+    try {
+      const result = await createOrderAction({
+        slug,
+        deliveryType,
+        paymentMethod,
+        customer: {
+          name: customer.name.trim(),
+          phone: normalizedPhone || customer.phone.trim(),
+          address: customer.address.trim(),
+          notes: customer.notes.trim(),
+        },
+        items: checkoutItems,
+      });
+
+      if (!result.ok) {
+        setSubmitError(result.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      onClear();
+      setSuccessOrder(result.orderNumber);
+      setStep("success");
+      setIsSubmitting(false);
+    } catch {
+      setSubmitError("Nao foi possivel confirmar agora. Tente novamente.");
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <>
       <div
-        onClick={onClose}
-        className={`fixed inset-0 z-40 bg-black/40 transition ${
+        onClick={handleCloseDrawer}
+        className={`fixed inset-0 z-40 bg-black/45 backdrop-blur-[1px] transition ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
       <div
-        className={`fixed bottom-0 left-0 right-0 z-50 mx-auto w-full max-w-[760px] rounded-t-[18px] border border-zinc-200 bg-white transition-transform duration-300 md:inset-y-0 md:left-auto md:right-0 md:mx-0 md:max-w-[420px] md:rounded-none md:border-l md:border-r-0 md:border-t-0 ${
+        className={`fixed inset-y-0 left-0 right-0 z-50 mx-auto flex h-screen max-h-screen w-full max-w-[760px] flex-col overflow-hidden rounded-t-[18px] border border-zinc-200 bg-white transition-transform duration-300 supports-[height:100dvh]:h-[100dvh] supports-[height:100dvh]:max-h-[100dvh] md:inset-y-0 md:left-auto md:right-0 md:mx-0 md:max-w-[560px] md:rounded-none md:border-l md:border-r-0 md:border-t-0 ${
           open
             ? "translate-y-0 md:translate-x-0"
             : "translate-y-full md:translate-x-full md:translate-y-0"
         }`}
       >
-        <div className="flex items-start justify-between border-b border-zinc-200 px-5 py-4">
-          <div>
-            <div className="text-lg font-semibold text-zinc-900">Seu carrinho</div>
-            <div className="mt-1 text-sm text-zinc-500">
-              {itemCountLabel}. Revise os itens antes de seguir para o checkout.
+        <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleCloseDrawer}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-zinc-200 text-zinc-700 transition hover:bg-zinc-100"
+              aria-label="Fechar sacola"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="text-[22px] font-semibold tracking-tight text-zinc-900">{stepTitle}</div>
+          </div>
+          {step === "cart" ? (
+            <button
+              type="button"
+              onClick={onClear}
+              disabled={items.length === 0}
+              className="text-[13px] font-medium text-zinc-500 transition hover:text-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Limpar sacola
+            </button>
+          ) : step === "address" ? (
+            <button
+              type="button"
+              onClick={() => setStep("cart")}
+              className="text-[13px] font-medium text-zinc-500 transition hover:text-zinc-800"
+            >
+              Voltar
+            </button>
+          ) : step === "checkout" ? (
+            <button
+              type="button"
+              onClick={() => setStep("address")}
+              className="text-[13px] font-medium text-zinc-500 transition hover:text-zinc-800"
+            >
+              Voltar
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleCloseDrawer}
+              className="text-[13px] font-medium text-zinc-500 transition hover:text-zinc-800"
+            >
+              Fechar
+            </button>
+          )}
+        </div>
+
+        {(step === "address" || step === "checkout") && currentCheckoutStepIndex >= 0 ? (
+          <div className="border-b border-zinc-200 px-5 py-3">
+            <div className="mb-1.5 flex items-center justify-between text-[12px] text-zinc-500">
+              <span>
+                Passo {currentCheckoutStepIndex + 1} de {checkoutFlowSteps.length}
+              </span>
+              <span>{checkoutFlowSteps[currentCheckoutStepIndex]?.label}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {checkoutFlowSteps.map((flowStep, index) => (
+                <div
+                  key={flowStep.id}
+                  className={`h-1.5 rounded-full transition ${
+                    index <= currentCheckoutStepIndex ? "bg-zinc-900" : "bg-zinc-200"
+                  }`}
+                />
+              ))}
             </div>
           </div>
+        ) : null}
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 text-base text-zinc-500"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="max-h-[56vh] overflow-y-auto px-5 py-4 md:max-h-[calc(100vh-220px)]">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center gap-3.5 border-b border-zinc-200 py-4 last:border-b-0"
-            >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-zinc-100 text-lg">
-                {item.emoji}
-              </div>
-
-              <div className="flex-1">
-                <div className="text-base font-medium leading-6 text-zinc-900">
-                  {item.name}
-                </div>
-                <div className="mt-1 text-sm text-zinc-500">
-                  {formatBRL(item.price)} cada
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onDecrease(item.id)}
-                  className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-zinc-300 bg-white text-base text-zinc-700"
-                >
-                  −
-                </button>
-
-                <span className="min-w-5 text-center text-base font-semibold text-zinc-900">
-                  {cart[item.id]}
-                </span>
-
-                <button
-                  onClick={() => onIncrease(item.id)}
-                  className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-zinc-900 text-base text-white"
-                >
-                  +
-                </button>
-              </div>
-
-              <div className="w-20 text-right text-base font-semibold text-zinc-900">
-                {formatBRL(item.price * (cart[item.id] || 0))}
+        {step === "cart" ? (
+          <>
+            <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3.5">
+              <div className="text-[18px] font-semibold text-zinc-900">{totalUnitsLabel}</div>
+              <div className="text-[18px] font-semibold text-zinc-900">
+                Total: {formatBRL(total)}
               </div>
             </div>
-          ))}
-        </div>
 
-        <div className="border-t border-zinc-200 px-5 py-4">
-          {items.length > 0 ? (
-            <div className="mb-3 flex justify-end">
+            <div className="border-b border-zinc-100 px-5 py-2 text-[12px] text-zinc-500">
+              {uniqueItemsLabel}
+            </div>
+
+            <div className="max-h-[56vh] overflow-y-auto md:max-h-[calc(100vh-235px)]">
+              {items.length === 0 ? (
+                <div className="px-5 py-8 text-sm text-zinc-500">
+                  Sua sacola esta vazia no momento.
+                </div>
+              ) : (
+                items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-3.5 border-b border-zinc-200 px-5 py-4"
+                  >
+                    <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-zinc-200 bg-zinc-50">
+                      {item.image ? (
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          sizes="80px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="text-2xl">{item.emoji || "🍽️"}</span>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="line-clamp-2 text-[15px] font-medium leading-5 text-zinc-900">
+                        {item.name}
+                      </div>
+                      <div className="mt-0.5 text-[12px] text-zinc-500">
+                        Codigo: {String(item.id).padStart(6, "0")}-1
+                      </div>
+                      <div className="mt-2 text-[16px] font-semibold text-zinc-900">
+                        {formatBRL(item.price * (cart[item.id] || 0))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onDecrease(item.id)}
+                        className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-300 bg-white text-base text-zinc-700"
+                      >
+                        −
+                      </button>
+
+                      <span className="min-w-5 text-center text-[15px] font-medium text-zinc-900">
+                        {cart[item.id]}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => onIncrease(item.id)}
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900 text-base text-white"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="border-t border-zinc-200 px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-4">
               <button
                 type="button"
-                onClick={onClear}
-                className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3.5 py-2 text-xs font-semibold text-red-700 transition hover:border-red-300 hover:bg-red-100"
+                onClick={() => setStep("address")}
+                disabled={items.length === 0}
+                className="block w-full rounded-[28px] bg-zinc-950 px-4 py-3 text-center text-[20px] font-semibold text-white transition hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                <Trash2 className="h-3.5 w-3.5" />
-                Limpar carrinho
+                Avancar: {formatBRL(total)}
               </button>
+
+              <div className="mt-2 text-center text-[12px] text-zinc-500">
+                Subtotal {formatBRL(subtotal)}{" "}
+                {deliveryFeeToCombine
+                  ? "+ entrega a combinar"
+                  : `+ entrega ${formatBRL(deliveryFee)}`}
+              </div>
+              {deliveryFeeToCombine ? (
+                <div className="mt-2 text-center text-[12px] text-zinc-500">
+                  Taxa de entrega definida no atendimento.
+                </div>
+              ) : null}
             </div>
-          ) : null}
+          </>
+        ) : null}
 
-          <div className="mb-1.5 flex justify-between text-sm text-zinc-500">
-            <span>Subtotal</span>
-            <span>{formatBRL(subtotal)}</span>
+        {step === "address" ? (
+          <>
+            <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3.5">
+              <div className="text-[15px] font-medium text-zinc-600">{totalUnitsLabel}</div>
+              <div className="text-[17px] font-semibold text-zinc-900">
+                Total: {formatBRL(sidebarTotal)}
+              </div>
+            </div>
+
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain px-5 py-4 [-webkit-overflow-scrolling:touch]">
+              <div className="rounded-[12px] border border-zinc-200 bg-zinc-50 p-3">
+                <div className="text-[12px] font-semibold uppercase tracking-[0.04em] text-zinc-500">
+                  Endereco
+                </div>
+                <div className="mt-1 text-[12px] text-zinc-500">
+                  Defina como o cliente vai receber o pedido.
+                </div>
+
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeliveryType("delivery");
+                      setSubmitError(null);
+                      setCustomerErrors((prev) => ({ ...prev, address: undefined }));
+                    }}
+                    className={`rounded-md border px-3 py-2 text-sm font-medium transition ${
+                      deliveryType === "delivery"
+                        ? "border-zinc-900 bg-zinc-900 text-white"
+                        : "border-zinc-300 bg-white text-zinc-600"
+                    }`}
+                  >
+                    Delivery
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeliveryType("pickup");
+                      setSubmitError(null);
+                      setCustomerErrors((prev) => ({ ...prev, address: undefined }));
+                    }}
+                    className={`rounded-md border px-3 py-2 text-sm font-medium transition ${
+                      deliveryType === "pickup"
+                        ? "border-zinc-900 bg-zinc-900 text-white"
+                        : "border-zinc-300 bg-white text-zinc-600"
+                    }`}
+                  >
+                    Retirada
+                  </button>
+                </div>
+
+                {deliveryType === "delivery" ? (
+                  <div className="mt-2 text-[12px] text-zinc-500">
+                    {deliveryFeeToCombine
+                      ? "Taxa definida no atendimento."
+                      : `Taxa de entrega: ${formatBRL(deliveryFee)}`}
+                  </div>
+                ) : (
+                  <div className="mt-2 text-[12px] text-zinc-500">
+                    Sem taxa de entrega na retirada.
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-[12px] border border-zinc-200 bg-zinc-50 p-3">
+                {deliveryType === "delivery" ? (
+                  <div className="mt-3 space-y-2">
+                    <label className="block text-xs font-medium text-zinc-600" htmlFor="sidebar-address-step">
+                      Endereco de entrega
+                    </label>
+                    <input
+                      id="sidebar-address-step"
+                      value={customer.address}
+                      onChange={(event) => updateCustomer("address", event.target.value)}
+                      placeholder="Rua, numero, bairro"
+                      className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition ${
+                        customerErrors.address
+                          ? "border-red-400 focus:border-red-500"
+                          : "border-zinc-300 focus:border-zinc-900"
+                      }`}
+                    />
+                    {customerErrors.address ? (
+                      <div className="text-[12px] text-red-500">{customerErrors.address}</div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="mt-1 text-[12px] text-zinc-500">
+                    Nao e necessario informar endereco para retirada.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="border-t border-zinc-200 px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-4">
+              <div className="mb-2 flex items-center justify-between text-sm text-zinc-600">
+                <span>Subtotal</span>
+                <span>{formatBRL(subtotal)}</span>
+              </div>
+              <div className="mb-2 flex items-center justify-between text-sm text-zinc-600">
+                <span>Entrega</span>
+                <span>
+                  {deliveryType === "pickup"
+                    ? "Gratis"
+                    : deliveryFeeToCombine
+                      ? "A combinar"
+                      : formatBRL(deliveryFee)}
+                </span>
+              </div>
+              <div className="mb-3 flex items-center justify-between border-t border-zinc-200 pt-2 text-base font-semibold text-zinc-900">
+                <span>Total</span>
+                <span>{formatBRL(sidebarTotal)}</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAdvanceToCheckoutDetails}
+                disabled={checkoutItems.length === 0}
+                className="block w-full rounded-[12px] bg-zinc-950 px-4 py-3 text-center text-[16px] font-semibold text-white transition hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Continuar para dados ({formatBRL(sidebarTotal)})
+              </button>
+
+              {submitError ? (
+                <div className="mt-2 text-[12px] text-red-500">{submitError}</div>
+              ) : (
+                <div className="mt-2 text-[12px] text-zinc-500">
+                  Etapa 1 do checkout: endereco.
+                </div>
+              )}
+            </div>
+          </>
+        ) : null}
+
+        {step === "checkout" ? (
+          <>
+            <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3.5">
+              <div className="text-[15px] font-medium text-zinc-600">{totalUnitsLabel}</div>
+              <div className="text-[17px] font-semibold text-zinc-900">
+                Total: {formatBRL(sidebarTotal)}
+              </div>
+            </div>
+
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain px-5 py-4 [-webkit-overflow-scrolling:touch]">
+              <div className="rounded-[12px] border border-zinc-200 bg-zinc-50 p-3">
+                <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.04em] text-zinc-500">
+                  Endereco
+                </div>
+                {deliveryType === "delivery" ? (
+                  <div className="space-y-2">
+                    <div className="text-sm text-zinc-700">
+                      {customer.address || "Endereco nao informado."}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setStep("address")}
+                      className="text-xs font-medium text-zinc-600 underline underline-offset-2"
+                    >
+                      Alterar endereco
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-zinc-700">Retirada no balcao.</div>
+                )}
+              </div>
+
+              <div className="rounded-[12px] border border-zinc-200 bg-zinc-50 p-3">
+                <div className="text-[12px] font-semibold uppercase tracking-[0.04em] text-zinc-500">
+                  Seus dados
+                </div>
+
+                <div className="mt-2 space-y-2">
+                  <label className="block text-xs font-medium text-zinc-600" htmlFor="sidebar-checkout-name">
+                    Nome completo
+                  </label>
+                  <input
+                    id="sidebar-checkout-name"
+                    value={customer.name}
+                    onChange={(event) => updateCustomer("name", event.target.value)}
+                    placeholder="Seu nome"
+                    className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition ${
+                      customerErrors.name
+                        ? "border-red-400 focus:border-red-500"
+                        : "border-zinc-300 focus:border-zinc-900"
+                    }`}
+                  />
+                  {customerErrors.name ? (
+                    <div className="text-[12px] text-red-500">{customerErrors.name}</div>
+                  ) : null}
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  <label className="block text-xs font-medium text-zinc-600" htmlFor="sidebar-checkout-phone">
+                    WhatsApp
+                  </label>
+                  <input
+                    id="sidebar-checkout-phone"
+                    value={customer.phone}
+                    onChange={(event) => updateCustomer("phone", event.target.value)}
+                    placeholder="(00) 00000-0000"
+                    className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition ${
+                      customerErrors.phone
+                        ? "border-red-400 focus:border-red-500"
+                        : "border-zinc-300 focus:border-zinc-900"
+                    }`}
+                  />
+                  {customerErrors.phone ? (
+                    <div className="text-[12px] text-red-500">{customerErrors.phone}</div>
+                  ) : null}
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  <label className="block text-xs font-medium text-zinc-600" htmlFor="sidebar-checkout-notes">
+                    Observacoes (opcional)
+                  </label>
+                  <textarea
+                    id="sidebar-checkout-notes"
+                    value={customer.notes}
+                    onChange={(event) => updateCustomer("notes", event.target.value)}
+                    placeholder="Ex.: sem gelo, troco para 100..."
+                    className="min-h-[76px] w-full resize-none rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-900"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-[12px] border border-zinc-200 bg-zinc-50 p-3">
+                <div className="text-[12px] font-semibold uppercase tracking-[0.04em] text-zinc-500">
+                  Pagamento
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {paymentOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setPaymentMethod(option.value)}
+                      className={`rounded-md border px-3 py-2 text-sm font-medium transition ${
+                        paymentMethod === option.value
+                          ? "border-zinc-900 bg-zinc-900 text-white"
+                          : "border-zinc-300 bg-white text-zinc-600"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-zinc-200 px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-4">
+              <div className="mb-2 flex items-center justify-between text-sm text-zinc-600">
+                <span>Subtotal</span>
+                <span>{formatBRL(subtotal)}</span>
+              </div>
+              <div className="mb-2 flex items-center justify-between text-sm text-zinc-600">
+                <span>Entrega</span>
+                <span>
+                  {deliveryType === "pickup"
+                    ? "Gratis"
+                    : deliveryFeeToCombine
+                      ? "A combinar"
+                      : formatBRL(deliveryFee)}
+                </span>
+              </div>
+              <div className="mb-3 flex items-center justify-between border-t border-zinc-200 pt-2 text-base font-semibold text-zinc-900">
+                <span>Total</span>
+                <span>{formatBRL(sidebarTotal)}</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  void handleConfirm();
+                }}
+                disabled={isSubmitting || checkoutItems.length === 0}
+                className="block w-full rounded-[12px] bg-zinc-950 px-4 py-3 text-center text-[16px] font-semibold text-white transition hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {isSubmitting ? "Confirmando pedido..." : `Confirmar pedido (${formatBRL(sidebarTotal)})`}
+              </button>
+
+              {submitError ? (
+                <div className="mt-2 text-[12px] text-red-500">{submitError}</div>
+              ) : (
+                <div className="mt-2 text-[12px] text-zinc-500">
+                  Etapa 2 do checkout: dados e pagamento.
+                </div>
+              )}
+            </div>
+          </>
+        ) : null}
+
+        {step === "success" ? (
+          <div className="flex flex-1 flex-col items-center justify-center px-6 py-8 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-lg font-semibold text-emerald-700">
+              ✓
+            </div>
+            <h3 className="text-xl font-semibold text-zinc-900">Pedido enviado com sucesso</h3>
+            <p className="mt-1 text-sm text-zinc-500">
+              Numero do pedido: {successOrder ?? "-"}
+            </p>
+            <p className="mt-1 text-sm text-zinc-500">
+              Pedido feito. Voltando para o sistema...
+            </p>
+
+            <button
+              type="button"
+              onClick={handleCloseDrawer}
+              className="mt-6 rounded-[12px] bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800"
+            >
+              Voltar ao cardapio
+            </button>
           </div>
-
-          <div className="mb-1.5 flex justify-between text-sm text-zinc-500">
-            <span>Taxa de entrega</span>
-            <span>{deliveryFeeToCombine ? "A combinar" : formatBRL(deliveryFee)}</span>
-          </div>
-
-          <div className="mb-4 flex justify-between text-xl font-semibold text-zinc-900">
-            <span>{deliveryFeeToCombine ? "Total parcial" : "Total"}</span>
-            <span className="text-zinc-900">{formatBRL(total)}</span>
-          </div>
-
-          <Link
-            href={`/${slug}/checkout`}
-            className="block w-full rounded-[12px] bg-zinc-900 px-4 py-3.5 text-center text-base font-semibold text-white transition hover:bg-zinc-800"
-          >
-            Continuar para checkout →
-          </Link>
-        </div>
+        ) : null}
       </div>
     </>
   );
