@@ -42,3 +42,8 @@ next-env.d.ts
 .nextar-reference.html
 src/data/restaurants 2.ts
 src/types/restaurant 2.ts
+
+# accidental duplicate files created with numeric suffixes
+src/app/**/page [0-9]*.tsx
+src/components/admin/* [0-9]*.tsx
+src/generated/prisma/* [0-9]*.ts
